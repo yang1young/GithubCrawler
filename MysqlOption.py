@@ -24,7 +24,8 @@ def create_database(user, password, database_name):
 def create_table(user, password, database_name, table_name):
     conn = MySQLdb.connect(host='localhost', user=user, passwd=password, db=database_name)
     curs = conn.cursor()
-    sql = """CREATE TABLE %s (id varchar (255) PRIMARY KEY, project_name varchar (255), description varchar(255), readme TEXT, library TEXT, tag TEXT)"""
+    sql = """CREATE TABLE %s (id varchar (255) PRIMARY KEY, project_name TEXT, description TEXT, 
+    readme TEXT, library_name TEXT, library_group TEXT,library_version TEXT, git_url TEXT, origin_id TEXT,tag TEXT)"""
     curs.execute(sql % table_name)
     conn.close()
 
@@ -41,15 +42,17 @@ class mysql():
         self.connection.close()
 
     def insert(self,data):
-        sql = "insert into "+self.table_name+"(id, project_name, description, readme, library, tag) values(%s,%s,%s,%s,%s,%s)"%data
+        #sql = "'{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}, '{7}', '{8}', '{9}'".format(id, project_name, description, readme, library_name,library_group,library_version, git_url,origin_id, tag)
+        sql = "insert into "+ self.table_name+" (id, project_name, description, readme, library_name,library_group,library_version, git_url, origin_id,tag) values('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}, '{7}', '{8}', '{9}')" %data
         self.cursor.execute(sql)
 
 
 if __name__ == "__main__":
     #create_database(USER,PWD,DB_NAME)
-    #create_table(USER,PWD,DB_NAME,TABLE_NAME)
+    create_table(USER,PWD,DB_NAME,TABLE_NAME)
     my = mysql(USER,PWD,DB_NAME,TABLE_NAME)
-    data = ('1','2','3','4','5','6')
+    data = ('2',"34em342","34343","3e434","343ed5","6","8","9","10",'rre f')
+    #data = ('1', 'elasticsearch', '', '', '', '', '', 'git://github.com/elastic/elasticsearch.git', '507775', 'elasticsearch#java#search-engine')
     my.insert(data)
     my.close_connection()
 

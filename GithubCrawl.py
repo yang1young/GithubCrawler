@@ -5,9 +5,9 @@ import CleanUtils as cu
 reload(sys)
 sys.setdefaultencoding('utf-8')
 import json, requests
-
+import MysqlOption as mysql
 #update your token here, https://github.com/settings/tokens
-TOKEN = '9f15c5c08f1d5b32758b34fb9f1686870c125758'
+TOKEN = '7f8a930735fa6ce00a3d393dced43f16008f7adf'
 #query limit is 30 times per hour
 MAX_PAGE = 4
 #max is 100 record per page
@@ -45,7 +45,7 @@ def get_information(item):
     head = {"Accept":"application/vnd.github.mercy-preview+json","Authorization": "token "+TOKEN}
     res = dict(json.loads(requests.get(url,headers=head).content))
     origin_id = res.get('id')
-    topics = res.get('topics')
+    topics = '#'.join(res.get('topics'))
     description = res.get('description')
     full_name = res.get('full_name')
     file_urls = []
@@ -61,28 +61,42 @@ def get_information(item):
                         blob_url = "https://raw.githubusercontent.com/"+full_name + '/master/' + r.get('path')
                         file_urls.append(blob_url)
 
-    print project_name,git_url,topics,description,origin_id,file_urls
-    print '************************************************************'
+    # print project_name,git_url,topics,description,origin_id,file_urls
+    # print '************************************************************'
     return project_name,git_url,topics,description,origin_id,file_urls
 
 
 #extract readme and dependency from url
 def extract_info_from_file(urls):
     readme = ''
+
     #format is groupId:artifactId:version
     # eg, com.android.tools.build:gradle:1.2.3, split by :
     dependency = []
 
-    for url in urls:
-        pass
-        #readme = cu.extract_markdown(readme)
+    dependency_group = []
+    dependency_name = []
+    dependency_version = []
 
-    return readme,dependency
+    for url in urls:
+        #readme = cu.extract_markdown(readme)
+        pass
+
+    for depend in dependency:
+        infos = str(depend).split(":")
+        dependency_group.append(infos[0])
+        dependency_name.append(infos[1])
+        dependency_version.append(infos[2])
+
+    return readme,dependency,'#'.join(dependency_group),'#'.join(dependency_name),'#'.join(dependency_version)
 
 
 #main function
-def crawl_url():
+def crawl_url(need_insert_database):
     id = 0
+    if(need_insert_database):
+        mysql_handler = mysql.mysql(mysql.USER,mysql.PWD,mysql.DB_NAME,mysql.TABLE_NAME)
+
     #crawl according to pages
     for i in range(MAX_PAGE):
         id +=1
@@ -92,14 +106,23 @@ def crawl_url():
         res = json.loads(request_result.content)
         items = dict(res).get("items")
         #every page has several project
+        readme, dependency, group, name, version = '',[],'','',''
         for item in items:
             project_name, git_url, topics, description, origin_id, file_urls = get_information(item)
             if(not len(file_urls)==0):
-                readme, dependency = extract_info_from_file(file_urls)
-                print readme
-                print dependency
+                readme, dependency,group,name,version = extract_info_from_file(file_urls)
+                if(not(description=='' and readme=='')):
+                    description = cu.clean(description)
+                    readme = cu.clean(readme)
+                    if(need_insert_database):
+                        data = (str(id),str(project_name),str(description),readme,name,group,version,git_url,str(origin_id),topics)
+                        print data
+                        mysql_handler.insert(data)
+                    else:
+                        print readme
+
 
 
 if __name__=="__main__":
-    crawl_url()
+    crawl_url(False)
     #mytest()

@@ -10,6 +10,8 @@ def remove_non_ascii_1(text):
     return ''.join(i for i in text if ord(i)<128)
 
 def clean(text):
+    text = remove_non_ascii_1(text)
+    text = re.sub(',',' ',text)
     text = re.sub(' +', ' ',text)
     text = re.sub('\n+','\n',text)
     return text
