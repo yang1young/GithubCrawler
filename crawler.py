@@ -7,22 +7,33 @@ sys.setdefaultencoding('utf-8')
 import json, requests
 
 #update your token here, https://github.com/settings/tokens
-TOKEN = ''
+TOKEN = 'bf8c5276f4698c557d2cd7b15e29419e2fb0d9eb'
 #query limit is 30 times per hour
 MAX_PAGE = 4
 #max is 100 record per page
-ITEM_PER_PAGE = 100
+ITEM_PER_PAGE = 10
+
+TYPE = ['README.md','build.gradle','pom.xml']
 
 #just for test
 def mytest():
     page = '3'
-    url = "https://api.github.com/search/repositories?q=language:Java&per_page=10&page="+page#+"&access_token="+TOKEN
+    #url = "https://api.github.com/search/repositories?q=language:Java&per_page=10&page="+page#+"&access_token="+TOKEN
     payload = {"Accept":"application/vnd.github.mercy-preview+json","Authorization": "token "+TOKEN}
-    #url = 'https://api.github.com/repos/libgdx/libgdx'
+    url = 'https://api.github.com/repos/json-iterator/java/git/trees/master?recursive=1'
+    url = 'https://api.github.com/repos/ReactiveX/RxJava/git/trees/master?recursive=1'
     a = requests.get(url,headers=payload)
     res = json.loads(a.content)
-    dict_res = dict(res)
-    print res
+    for r in dict(res).get('tree'):
+        r = dict(r)
+        if(r.get('type')==u'blob'):
+            for type_choose in TYPE:
+                if(type_choose in str(r.get('path'))):
+                     blob_url = "https://raw.githubusercontent.com/json-iterator/java/"+'master/'+r.get('path') #'/'.join(r.get('url').split('/')[:-3])+'/'+'blob/master/'+r.get('path')
+                     print blob_url
+
+    #dict_res = dict(res)
+   # print res
     #     if(dict_item.get("name")=='android-classyshark'):
     #           for i, j in dict(item).iteritems():
     #               print str(i)+':'+str(j)
@@ -41,8 +52,38 @@ def get_information(item):
     origin_id = res.get('id')
     topics = res.get('topics')
     description = res.get('description')
+    full_name = res.get('full_name')
+    file_urls = []
 
-    print project_name,git_url,topics,description,origin_id
+    get_file_url = url+'/git/trees/master?recursive=1'
+    file_result = json.loads(requests.get(get_file_url).content)
+
+    for r in dict(file_result).get('tree'):
+        r = dict(r)
+        if (r.get('type') == 'blob'):
+            for type_choose in TYPE:
+                if (type_choose in str(r.get('path'))):
+                    blob_url = "https://raw.githubusercontent.com/"+full_name + '/master/' + r.get('path')
+                    file_urls.append(blob_url)
+
+    print project_name,git_url,topics,description,origin_id,file_urls
+    print '************************************************************'
+    return project_name,git_url,topics,description,origin_id,file_urls
+
+
+
+
+def extract_info_from_file(urls):
+    readme = ''
+    # eg, com.android.tools.build:gradle:1.2.3, split by :
+    dependency = []
+
+    for url in urls:
+        pass
+
+    return readme,dependency
+
+
 
 
 def crawl_url():
@@ -57,8 +98,10 @@ def crawl_url():
         items = dict(res).get("items")
         #every page has several project
         for item in items:
-            get_information(item)
-
+            project_name, git_url, topics, description, origin_id, file_urls = get_information(item)
+            readme, dependency = extract_info_from_file(file_urls)
+            print readme
+            print dependency
 
 
 
