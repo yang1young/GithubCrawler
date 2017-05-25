@@ -7,7 +7,7 @@ sys.setdefaultencoding('utf-8')
 import json, requests
 
 #update your token here, https://github.com/settings/tokens
-TOKEN = 'bf8c5276f4698c557d2cd7b15e29419e2fb0d9eb'
+TOKEN = '9f15c5c08f1d5b32758b34fb9f1686870c125758'
 #query limit is 30 times per hour
 MAX_PAGE = 4
 #max is 100 record per page
@@ -52,14 +52,14 @@ def get_information(item):
 
     get_file_url = url+'/git/trees/master?recursive=1'
     file_result = json.loads(requests.get(get_file_url).content)
-
-    for r in dict(file_result).get('tree'):
-        r = dict(r)
-        if (r.get('type') == 'blob'):
-            for type_choose in TYPE:
-                if (type_choose in str(r.get('path'))):
-                    blob_url = "https://raw.githubusercontent.com/"+full_name + '/master/' + r.get('path')
-                    file_urls.append(blob_url)
+    if(dict(file_result).has_key('tree')):
+        for r in dict(file_result).get('tree'):
+            r = dict(r)
+            if (r.get('type') == 'blob'):
+                for type_choose in TYPE:
+                    if (type_choose in str(r.get('path'))):
+                        blob_url = "https://raw.githubusercontent.com/"+full_name + '/master/' + r.get('path')
+                        file_urls.append(blob_url)
 
     print project_name,git_url,topics,description,origin_id,file_urls
     print '************************************************************'
@@ -69,11 +69,13 @@ def get_information(item):
 #extract readme and dependency from url
 def extract_info_from_file(urls):
     readme = ''
+    #format is groupId:artifactId:version
     # eg, com.android.tools.build:gradle:1.2.3, split by :
     dependency = []
 
     for url in urls:
-        readme = cu.extract_markdown(readme)
+        pass
+        #readme = cu.extract_markdown(readme)
 
     return readme,dependency
 
@@ -92,9 +94,10 @@ def crawl_url():
         #every page has several project
         for item in items:
             project_name, git_url, topics, description, origin_id, file_urls = get_information(item)
-            readme, dependency = extract_info_from_file(file_urls)
-            print readme
-            print dependency
+            if(not len(file_urls)==0):
+                readme, dependency = extract_info_from_file(file_urls)
+                print readme
+                print dependency
 
 
 if __name__=="__main__":
