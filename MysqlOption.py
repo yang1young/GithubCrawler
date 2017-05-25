@@ -6,8 +6,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 #according to this tutorial
-#http://www.liaoxuefeng.com/wiki
-# /001374738125095c955c1e6d8bb493182103fac9270762a000/001391435131816c6a377e100ec4d43b3fc9145f3bb8056000
+#http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/001391435131816c6a377e100ec4d43b3fc9145f3bb8056000
 
 USER = 'root'
 PWD = '1qazxc'
@@ -46,11 +45,11 @@ class mysql():
         self.cursor.execute(sql)
 
 
-
-#create_database(USER,PWD,DB_NAME)
-#create_table(USER,PWD,DB_NAME,TABLE_NAME)
-my = mysql(USER,PWD,DB_NAME,TABLE_NAME)
-data = ('1','2','3','4','5','6')
-my.insert(data)
-my.close_connection()
+if __name__ == "__main__":
+    #create_database(USER,PWD,DB_NAME)
+    #create_table(USER,PWD,DB_NAME,TABLE_NAME)
+    my = mysql(USER,PWD,DB_NAME,TABLE_NAME)
+    data = ('1','2','3','4','5','6')
+    my.insert(data)
+    my.close_connection()
 
