@@ -7,7 +7,7 @@ sys.setdefaultencoding('utf-8')
 import json, requests
 import MysqlOption as mysql
 #update your token here, https://github.com/settings/tokens
-TOKEN = ''
+TOKEN = '2627031bf3c660b85dc3637d58a38b11b47cba6e'
 #query limit is 30 times per hour
 MAX_PAGE = 4
 #max is 100 record per page
@@ -38,19 +38,18 @@ def get_information(item):
 
     dict_item = dict(item)
     project_name = dict_item.get("name")
-    url =  dict_item.get("url")
+    project_url =  dict_item.get("url")
     git_url = dict_item.get("git_url")
 
     #do another query for a specific project and modify GET header,query limits is 5000 per hour
     head = {"Accept":"application/vnd.github.mercy-preview+json","Authorization": "token "+TOKEN}
-    res = dict(json.loads(requests.get(url,headers=head).content))
+    res = dict(json.loads(requests.get(project_url,headers=head).content))
     origin_id = res.get('id')
     topics = '#'.join(res.get('topics'))
     description = res.get('description')
-    full_name = res.get('full_name')
-    file_urls = []
+    file_path = []
 
-    get_file_url = url+'/git/trees/master?recursive=1'
+    get_file_url = project_url+'/git/trees/master?recursive=1'
     file_result = json.loads(requests.get(get_file_url).content)
     if(dict(file_result).has_key('tree')):
         for r in dict(file_result).get('tree'):
@@ -58,16 +57,16 @@ def get_information(item):
             if (r.get('type') == 'blob'):
                 for type_choose in TYPE:
                     if (type_choose in str(r.get('path'))):
-                        blob_url = "https://raw.githubusercontent.com/"+full_name + '/master/' + r.get('path')
-                        file_urls.append(blob_url)
-
+                        #blob_url = "https://raw.githubusercontent.com/"+full_name + '/master/' + r.get('path')
+                        file_path.append(str(r.get('path')))
+    #print file_path
     # print project_name,git_url,topics,description,origin_id,file_urls
     # print '************************************************************'
-    return project_name,git_url,topics,description,origin_id,file_urls
+    return project_name,git_url,topics,description,origin_id,file_path,project_url
 
 
 #extract readme and dependency from url
-def extract_info_from_file(urls):
+def extract_info_from_file(project_url,file_paths):
     readme = ''
 
     #format is groupId:artifactId:version
@@ -78,7 +77,7 @@ def extract_info_from_file(urls):
     dependency_name = []
     dependency_version = []
 
-    for url in urls:
+    for path in file_paths:
         #readme = cu.extract_markdown(readme)
         pass
 
@@ -107,9 +106,9 @@ def crawl_url(need_insert_database):
         #every page has several project
         #readme, dependency, group, name, version = '',[],'','',''
         for item in items:
-            project_name, git_url, topics, description, origin_id, file_urls = get_information(item)
-            if(not len(file_urls)==0):
-                readme, dependency,group,name,version = extract_info_from_file(file_urls)
+            project_name, git_url, topics, description, origin_id, file_path,project_url = get_information(item)
+            if(not len(file_path)==0):
+                readme, dependency,group,name,version = extract_info_from_file(project_url,file_path)
                 if(not(description=='' and readme=='')):
                     description = cu.clean(description)
                     readme = cu.clean(readme)
