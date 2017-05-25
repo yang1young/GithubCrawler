@@ -7,7 +7,7 @@ sys.setdefaultencoding('utf-8')
 import json, requests
 import MysqlOption as mysql
 #update your token here, https://github.com/settings/tokens
-TOKEN = '7f8a930735fa6ce00a3d393dced43f16008f7adf'
+TOKEN = ''
 #query limit is 30 times per hour
 MAX_PAGE = 4
 #max is 100 record per page
@@ -99,14 +99,13 @@ def crawl_url(need_insert_database):
 
     #crawl according to pages
     for i in range(MAX_PAGE):
-        id +=1
         url = "https://api.github.com/search/repositories?q=language:Java&per_page="+ str(ITEM_PER_PAGE)+"&page="+ str(i+1) + "&access_token=" + TOKEN
         request_result = requests.get(url)
         print request_result.headers.get('X-RateLimit-Remaining')
         res = json.loads(request_result.content)
         items = dict(res).get("items")
         #every page has several project
-        readme, dependency, group, name, version = '',[],'','',''
+        #readme, dependency, group, name, version = '',[],'','',''
         for item in items:
             project_name, git_url, topics, description, origin_id, file_urls = get_information(item)
             if(not len(file_urls)==0):
@@ -115,9 +114,11 @@ def crawl_url(need_insert_database):
                     description = cu.clean(description)
                     readme = cu.clean(readme)
                     if(need_insert_database):
+                        id += 1
                         data = (str(id),str(project_name),str(description),readme,name,group,version,git_url,str(origin_id),topics)
                         print data
                         mysql_handler.insert(data)
+                        mysql_handler.connection.commit()
                     else:
                         print readme
 

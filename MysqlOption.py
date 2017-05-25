@@ -42,14 +42,15 @@ class mysql():
         self.connection.close()
 
     def insert(self,data):
+        #(id, project_name, description, readme, library_name,library_group,library_version, git_url, origin_id,tag)
         #sql = "'{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}, '{7}', '{8}', '{9}'".format(id, project_name, description, readme, library_name,library_group,library_version, git_url,origin_id, tag)
-        sql = "insert into "+ self.table_name+" (id, project_name, description, readme, library_name,library_group,library_version, git_url, origin_id,tag) values('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}, '{7}', '{8}', '{9}')" %data
-        self.cursor.execute(sql)
+        sql = "insert into "+ self.table_name+" values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        self.cursor.execute(sql,data)
 
 
 if __name__ == "__main__":
     #create_database(USER,PWD,DB_NAME)
-    create_table(USER,PWD,DB_NAME,TABLE_NAME)
+    #create_table(USER,PWD,DB_NAME,TABLE_NAME)
     my = mysql(USER,PWD,DB_NAME,TABLE_NAME)
     data = ('2',"34em342","34343","3e434","343ed5","6","8","9","10",'rre f')
     #data = ('1', 'elasticsearch', '', '', '', '', '', 'git://github.com/elastic/elasticsearch.git', '507775', 'elasticsearch#java#search-engine')
