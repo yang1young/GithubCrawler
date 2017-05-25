@@ -2,8 +2,7 @@
 #coding=utf-8
 import re
 import sys
-import base64
-
+import mistune
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -25,7 +24,16 @@ def base64_to_utf8(file):
         return encoded.encode('utf-8')
 
 
+def extract_markdown(text):
+    text = mistune.markdown(text)
+    these_regex = "<p>(.+?)</p>"
+    pattern = re.compile(these_regex)
+    result = re.findall(pattern, text)[0]
+    return result
 
-print remove_non_ascii_1('sdwodesds~~~')
-print clean('fs\n\n   ff ')
-print base64_to_utf8('/home/yangqiao/1')
+
+# print remove_non_ascii_1('sdwodesds~~~')
+# print clean('fs\n\n   ff ')
+# print base64_to_utf8('/home/yangqiao/1')
+
+print extract_markdown(open('text.md', 'r').read())
