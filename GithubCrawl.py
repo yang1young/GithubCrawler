@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import urllib
+import re
+from bs4 import BeautifulSoup
 import sys
 import CleanUtils as cu
 reload(sys)
@@ -38,7 +41,7 @@ def get_information(item):
 
     dict_item = dict(item)
     project_name = dict_item.get("name")
-    project_url =  dict_item.get("url")
+    url =  dict_item.get("url")
     git_url = dict_item.get("git_url")
 
     #do another query for a specific project and modify GET header,query limits is 5000 per hour
@@ -47,7 +50,8 @@ def get_information(item):
     origin_id = res.get('id')
     topics = '#'.join(res.get('topics'))
     description = res.get('description')
-    file_path = []
+    full_name = res.get('full_name')
+    file_urls = []
 
     get_file_url = project_url+'/git/trees/master?recursive=1'
     file_result = json.loads(requests.get(get_file_url).content)
@@ -57,16 +61,16 @@ def get_information(item):
             if (r.get('type') == 'blob'):
                 for type_choose in TYPE:
                     if (type_choose in str(r.get('path'))):
-                        #blob_url = "https://raw.githubusercontent.com/"+full_name + '/master/' + r.get('path')
-                        file_path.append(str(r.get('path')))
+                        blob_url = "https://raw.githubusercontent.com/"+full_name + '/master/' + r.get('path')
+                        file_urls.append(blob_url)
     #print file_path
     # print project_name,git_url,topics,description,origin_id,file_urls
     # print '************************************************************'
-    return project_name,git_url,topics,description,origin_id,file_path,project_url
+    return project_name,git_url,topics,description,origin_id,file_urls
 
 
 #extract readme and dependency from url
-def extract_info_from_file(project_url,file_paths):
+def extract_info_from_file(urls):
     readme = ''
 
     #format is groupId:artifactId:version
@@ -77,10 +81,30 @@ def extract_info_from_file(project_url,file_paths):
     dependency_name = []
     dependency_version = []
 
-    for path in file_paths:
+    for url in urls:
         #readme = cu.extract_markdown(readme)
-        pass
-
+        page = urllib.urlopen(url)
+        text = page.read()
+        #README.md
+        if url.find(TYPE[0]) != -1:
+            readme = cu.extract_markdown(text)
+        #build.gradle
+        elif url.find(TYPE[1]) != -1:
+            index = text.find("dependencies {")
+            text = text[index:]
+            index = text.find("}")
+            text = text[:index]
+            p = re.compile(r'\'(.*:.*:.*)\'\n')
+            for dep in p.findall(text):
+                dependency.append(dep)
+        #pom.xml
+        elif url.find(TYPE[2]) != -1:
+            soup = BeautifulSoup(text)
+            dep = soup.findAll(name = "dependency")
+            for i in range(len(dep)):
+                temp = dep[i].contents
+                dependency.append(temp[1].text + ":" + temp[3].text + ":" + temp[5].text)
+ 
     for depend in dependency:
         infos = str(depend).split(":")
         dependency_group.append(infos[0])
@@ -106,7 +130,7 @@ def crawl_url(need_insert_database):
         #every page has several project
         #readme, dependency, group, name, version = '',[],'','',''
         for item in items:
-            project_name, git_url, topics, description, origin_id, file_path,project_url = get_information(item)
+            project_name, git_url, topics, description, origin_id, file_urls = get_information(item)
             if(not len(file_path)==0):
                 readme, dependency,group,name,version = extract_info_from_file(project_url,file_path)
                 if(not(description=='' and readme=='')):
