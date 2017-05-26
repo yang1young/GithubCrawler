@@ -1,61 +1,65 @@
-# RecyclerViewSnap
+img align="right" src="https://raw.github.com/wiki/zxing/zxing/zxing-logo.png"/>
 
-RecyclerView snapping example with SnapHelper
+## Get Started Developing
+To get started, please visit: https://github.com/zxing/zxing/wiki/Getting-Started-Developing
 
-<img src="screens/snap_googleplay.gif" width=300></img>   <img src="screens/snap_final.gif" width=300></img>
+ZXing ("zebra crossing") is an open-source, multi-format 1D/2D barcode image processing
+library implemented in Java, with ports to other languages.
 
-## How to
+## Supported Formats
 
-If you need snapping support to start, top, end or bottom, use GravitySnapHelper.
+| 1D product | 1D industrial | 2D
+| ---------- | ------------- | --------------
+| UPC-A      | Code 39       | QR Code
+| UPC-E      | Code 93       | Data Matrix
+| EAN-8      | Code 128      | Aztec (beta)
+| EAN-13     | Codabar       | PDF 417 (beta)
+|            | ITF           | MaxiCode
+|            | RSS-14        |
+|            | RSS-Expanded  |
 
-Add this to your build.gradle:
+## Components
 
-```groovy
-compile 'com.github.rubensousa:gravitysnaphelper:1.1'
-```
+### Active
 
-Otherwise, center snapping is done with LinearSnapHelper (part of the recyclerview-v7 package).
+| Module              | Description
+| ------------------- | -----------
+| core                | The core image decoding library, and test code
+| javase              | JavaSE-specific client code
+| android             | Android client Barcode Scanner [![Barcode Scanner](https://www.android.com/images/brand/android_app_on_play_logo_small.png)](https://play.google.com/store/apps/details?id=com.google.zxing.client.android)
+| android-integration | Supports integration with Barcode Scanner via `Intent`
+| android-core        | Android-related code shared among `android`, other Android apps
+| zxingorg            | The source behind `zxing.org`
+| zxing.appspot.com   | The source behind web-based barcode generator at `zxing.appspot.com`
 
-### Snapping center:
+### Available in previous releases
 
-```java
-SnapHelper snapHelper = new LinearSnapHelper();
-snapHelper.attachToRecyclerView(recyclerView);
-```
+| Module | Description
+| ------ | -----------
+| [cpp](https://github.com/zxing/zxing/tree/00f634024ceeee591f54e6984ea7dd666fab22ae/cpp)                   | C++ port
+| [iphone](https://github.com/zxing/zxing/tree/00f634024ceeee591f54e6984ea7dd666fab22ae/iphone)             | iPhone client
+| [objc](https://github.com/zxing/zxing/tree/00f634024ceeee591f54e6984ea7dd666fab22ae/objc)                 | Objective C port
+| [actionscript](https://github.com/zxing/zxing/tree/c1df162b95e07928afbd4830798cc1408af1ac67/actionscript) | Partial ActionScript port
+| [jruby](https://github.com/zxing/zxing/tree/a95a8fee842f67fb43799a8e0e70e4c68b509c43/jruby)               | JRuby wrapper
 
-### Snapping start with GravitySnapHelper:
+### ZXing-based third-party open source projects
 
-```java
-startRecyclerView.setLayoutManager(new LinearLayoutManager(this,
-                LinearLayoutManager.HORIZONTAL, false));
-                
-SnapHelper snapHelperStart = new GravitySnapHelper(Gravity.START);
-snapHelperStart.attachToRecyclerView(startRecyclerView);
-```
+| Module                                                          | Description
+| --------------------------------------------------------------- | -----------
+| [QZXing](https://github.com/ftylitak/qzxing)                    | port to Qt framework
+| [zxing-cpp](https://github.com/glassechidna/zxing-cpp)          | port to C++ (forked from the [deprecated official C++ port](https://github.com/zxing/zxing/tree/00f634024ceeee591f54e6984ea7dd666fab22ae/cpp))
+| [zxing_cpp.rb](https://github.com/glassechidna/zxing_cpp.rb)    | bindings for Ruby (not just JRuby), powered by [zxing-cpp](https://github.com/glassechidna/zxing-cpp)
+| [jsqrcode](https://github.com/LazarSoft/jsqrcode)               | port to JavaScript
+| [python-zxing](https://github.com/oostendo/python-zxing)        | bindings for Python
+| [ZXing .NET](https://github.com/micjahn/ZXing.Net)                     | port to .NET and C#, and related Windows platform
+| [php-qrcode-detector-decoder](https://github.com/khanamiryan/php-qrcode-detector-decoder)                     | port to PHP
+| [ZXing Delphi](https://github.com/Spelt/ZXing.Delphi)          |  Port to native Delphi object pascal, targeted at Firemonkey compatible devices (IOS/Android/Win/OSX) and VCL.
 
-### Snapping top with GravitySnapHelper:
 
-```java
-topRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-                
-SnapHelper snapHelperTop = new GravitySnapHelper(Gravity.TOP);
-snapHelperTop.attachToRecyclerView(topRecyclerView);
-```
+### Other related third-party open source projects
 
-## License
-
-    Copyright 2016 The Android Open Source Project
-    Copyright 2016 Rúben Sousa
-    
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-    
-        http://www.apache.org/licenses/LICENSE-2.0
-    
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-
+| Module                                         | Description
+| ---------------------------------------------- | -----------
+| [Barcode4J](http://barcode4j.sourceforge.net/) | Generator library in Java
+| [ZBar](http://zbar.sourceforge.net/)           | Reader library in C99
+| [OkapiBarcode](https://github.com/woo-j/OkapiBarcode)  |

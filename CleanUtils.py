@@ -24,11 +24,31 @@ def base64_to_utf8(file):
         return encoded.encode('utf-8')
 
 def extract_markdown(text):
-    text = mistune.markdown(text)
-    these_regex = "<p>(.+?)</p>"
-    pattern = re.compile(these_regex)
-    result = re.findall(pattern, text)[0]
-    return result
+    #print text
+    #text = mistune.markdown(text)
+    #these_regex = "<p>(.+?)</p>"
+    url = '(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.' \
+          '[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\
+          .[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})'
+    text = re.sub(url,'',text)
+    text = clean(text)
+    xml  = "<(.+?)/(.+?)>"
+    text = re.sub(xml,'',text)
+    #text = mistune.markdown(text)
+    #paraph = r"\#(.*?)\#"
+    pattern = re.compile(r'\#+(.+?)\#+', flags=re.DOTALL)
+    result = re.findall(pattern, text)
+    if(len(result)!=0):
+        return result[0].replace('\n',' ')
+    else:
+        text = mistune.markdown(text)
+        pattern = re.compile(r'<p(.+?)/p>+', flags=re.DOTALL)
+        result = re.findall(pattern, text)
+        if(len(result)!=0):
+            return result[0].replace('\n',' ')
+        else:
+            return ''
+
 
 if __name__=="__main__":
 

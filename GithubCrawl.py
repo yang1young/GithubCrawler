@@ -10,13 +10,13 @@ sys.setdefaultencoding('utf-8')
 import json, requests
 import MysqlOption as mysql
 #update your token here, https://github.com/settings/tokens
-TOKEN = '2627031bf3c660b85dc3637d58a38b11b47cba6e'
+TOKEN = '8536dcbb146434fada7ba9f05f559202ccba3be3'
 #query limit is 30 times per hour
 MAX_PAGE = 4
 #max is 100 record per page
 ITEM_PER_PAGE = 10
 
-TYPE = ['README.md','build.gradle','pom.xml']
+TYPE = ['README','build.gradle','pom.xml']
 
 #just for test
 def mytest():
@@ -41,7 +41,7 @@ def get_information(item):
 
     dict_item = dict(item)
     project_name = dict_item.get("name")
-    url =  dict_item.get("url")
+    project_url =  dict_item.get("url")
     git_url = dict_item.get("git_url")
 
     #do another query for a specific project and modify GET header,query limits is 5000 per hour
@@ -52,15 +52,16 @@ def get_information(item):
     description = res.get('description')
     full_name = res.get('full_name')
     file_urls = []
-
     get_file_url = project_url+'/git/trees/master?recursive=1'
     file_result = json.loads(requests.get(get_file_url).content)
+
     if(dict(file_result).has_key('tree')):
         for r in dict(file_result).get('tree'):
             r = dict(r)
             if (r.get('type') == 'blob'):
                 for type_choose in TYPE:
-                    if (type_choose in str(r.get('path'))):
+                    temp_path = str(r.get('path'))
+                    if (type_choose in temp_path):
                         blob_url = "https://raw.githubusercontent.com/"+full_name + '/master/' + r.get('path')
                         file_urls.append(blob_url)
     #print file_path
@@ -99,11 +100,12 @@ def extract_info_from_file(urls):
                 dependency.append(dep)
         #pom.xml
         elif url.find(TYPE[2]) != -1:
-            soup = BeautifulSoup(text)
+            soup = BeautifulSoup(text, "lxml")
             dep = soup.findAll(name = "dependency")
             for i in range(len(dep)):
                 temp = dep[i].contents
-                dependency.append(temp[1].text + ":" + temp[3].text + ":" + temp[5].text)
+                if(len(temp)==7):
+                    dependency.append(temp[1].text + ":" + temp[3].text + ":" + temp[5].text)
  
     for depend in dependency:
         infos = str(depend).split(":")
@@ -112,6 +114,27 @@ def extract_info_from_file(urls):
         dependency_version.append(infos[2])
 
     return readme,dependency,'#'.join(dependency_group),'#'.join(dependency_name),'#'.join(dependency_version)
+
+
+def get_real_file_url(urls):
+    min_readme_lenghth = 100000
+    min_readme_path = ''
+    for url in urls:
+        if('README' in url):
+            if(len(url)<min_readme_lenghth):
+                min_readme_lenghth = len(url)
+                min_readme_path = url
+    new_urls = []
+    for url in urls:
+        if (not('README' in url)):
+            new_urls.append(url)
+    new_urls.sort(lambda x,y: cmp(len(str(x).split('/')), len(str(x).split('/'))))
+   # print new_urls
+    new_urls = new_urls[:10]
+
+    new_urls.append(min_readme_path)
+    return new_urls
+
 
 
 #main function
@@ -131,15 +154,21 @@ def crawl_url(need_insert_database):
         #readme, dependency, group, name, version = '',[],'','',''
         for item in items:
             project_name, git_url, topics, description, origin_id, file_urls = get_information(item)
-            if(not len(file_path)==0):
-                readme, dependency,group,name,version = extract_info_from_file(project_url,file_path)
+            if(not len(file_urls)==0):
+                file_urls = get_real_file_url(file_urls)
+                readme, dependency,group,name,version = extract_info_from_file(file_urls)
                 if(not(description=='' and readme=='')):
                     description = cu.clean(description)
                     readme = cu.clean(readme)
                     if(need_insert_database):
                         id += 1
                         data = (str(id),str(project_name),str(description),readme,name,group,version,git_url,str(origin_id),topics)
-                        print data
+                        #print data
+                        print '*************************************'
+                        print project_name
+                        print description
+                        print readme
+                        print name
                         mysql_handler.insert(data)
                         mysql_handler.connection.commit()
                     else:
@@ -148,5 +177,5 @@ def crawl_url(need_insert_database):
 
 
 if __name__=="__main__":
-    crawl_url(False)
+    crawl_url(True)
     #mytest()
