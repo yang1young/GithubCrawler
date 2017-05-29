@@ -12,11 +12,15 @@ def remove_non_ascii_1(text):
     return ''.join(i for i in text if ord(i)<128)
 
 def clean(text):
-    text = remove_non_ascii_1(text)
-    text = re.sub(',',' ',text)
-    text = re.sub(' +', ' ',text)
-    text = re.sub('\n+','\n',text)
+    try:
+        text = remove_non_ascii_1(text)
+        text = re.sub(',',' ',text)
+        text = re.sub(' +', ' ',text)
+        text = re.sub('\n+','\n',text)
+    except Exception,e:
+        print e
     return text
+
 
 def base64_to_utf8(file):
     with open(file,'r') as f:
@@ -26,9 +30,7 @@ def base64_to_utf8(file):
         return encoded.encode('utf-8')
 
 def extract_markdown(text):
-    #print text
-    #text = mistune.markdown(text)
-    #these_regex = "<p>(.+?)</p>"
+
     url = '(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.' \
           '[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\
           .[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})'
@@ -36,7 +38,7 @@ def extract_markdown(text):
     text = clean(text)
     xml  = "<(.+?)/(.+?)>"
     text = re.sub(xml,'',text)
-
+    text = text.replace(',',' ')
     pattern = re.compile(r'\#+(.+?)\#+', flags=re.DOTALL)
     result = re.findall(pattern, text)
     if(len(result)>10):
@@ -50,8 +52,6 @@ def extract_markdown(text):
         else:
             info = (text[:MAX_STRING_LENGTH] + ' ...') if len(text) > MAX_STRING_LENGTH else text
             return info
-    #info = (text[:MAX_STRING_LENGTH] + ' ...') if len(text) > MAX_STRING_LENGTH else text
-    #return info
 
 
 if __name__=="__main__":

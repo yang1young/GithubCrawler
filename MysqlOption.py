@@ -5,9 +5,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-#according to this tutorial
-#http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/001391435131816c6a377e100ec4d43b3fc9145f3bb8056000
-
+#for mysql use
 USER = 'root'
 PWD = '1qazxc'
 DB_NAME = 'Github'
@@ -49,11 +47,10 @@ class mysql():
 
 
 if __name__ == "__main__":
-    #create_database(USER,PWD,DB_NAME)
+    create_database(USER,PWD,DB_NAME)
     create_table(USER,PWD,DB_NAME,TABLE_NAME)
-    my = mysql(USER,PWD,DB_NAME,TABLE_NAME)
-    data = ('2',"34em342","34343","3e434","343ed5","6","8","9",'4','rre f')
-    #data = ('1', 'elasticsearch', '', '', '', '', '', 'git://github.com/elastic/elasticsearch.git', '507775', 'elasticsearch#java#search-engine')
-    my.insert(data)
-    my.close_connection()
+    #my = mysql(USER,PWD,DB_NAME,TABLE_NAME)
+    #data = ('2',"34em342","34343","3e434","343ed5","6","8","9",'4','rre f')
+    #my.insert(data)
+    #my.close_connection()
 
