@@ -10,11 +10,11 @@ sys.setdefaultencoding('utf-8')
 import json, requests
 import MysqlOption as mysql
 #update your token here, https://github.com/settings/tokens
-TOKEN = '8536dcbb146434fada7ba9f05f559202ccba3be3'
+TOKEN = 'deab18031b619c12708606ad60077a9358f4c4f5'
 #query limit is 30 times per hour
-MAX_PAGE = 4
+MAX_PAGE = 10
 #max is 100 record per page
-ITEM_PER_PAGE = 10
+ITEM_PER_PAGE = 30
 
 TYPE = ['README','build.gradle','pom.xml']
 
@@ -53,7 +53,7 @@ def get_information(item):
     full_name = res.get('full_name')
     file_urls = []
     get_file_url = project_url+'/git/trees/master?recursive=1'
-    file_result = json.loads(requests.get(get_file_url).content)
+    file_result = json.loads(requests.get(get_file_url,headers=head).content)
 
     if(dict(file_result).has_key('tree')):
         for r in dict(file_result).get('tree'):
@@ -133,7 +133,7 @@ def get_real_file_url(urls):
     new_urls = new_urls[:10]
 
     new_urls.append(min_readme_path)
-    return new_urls
+    return new_urls,min_readme_path
 
 
 
@@ -154,23 +154,23 @@ def crawl_url(need_insert_database):
         #readme, dependency, group, name, version = '',[],'','',''
         for item in items:
             project_name, git_url, topics, description, origin_id, file_urls = get_information(item)
+            #print file_urls
             if(not len(file_urls)==0):
-                file_urls = get_real_file_url(file_urls)
+                file_urls,readme_url = get_real_file_url(file_urls)
                 readme, dependency,group,name,version = extract_info_from_file(file_urls)
                 if(not(description=='' and readme=='')):
                     description = cu.clean(description)
                     readme = cu.clean(readme)
                     if(need_insert_database):
                         id += 1
-                        data = (str(id),str(project_name),str(description),readme,name,group,version,git_url,str(origin_id),topics)
+                        data = (str(origin_id),str(project_name),str(description),readme,name,group,version,git_url,readme_url,topics)
                         #print data
-                        print '*************************************'
-                        print project_name
-                        print description
-                        print readme
-                        print name
-                        mysql_handler.insert(data)
-                        mysql_handler.connection.commit()
+                        print str(id)+'-----------'+str(i)+'---------'+project_name+'--------'
+                        try:
+                            mysql_handler.insert(data)
+                            mysql_handler.connection.commit()
+                        except:
+                            print 'Duplicate entry'
                     else:
                         print readme
 

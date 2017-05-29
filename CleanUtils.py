@@ -6,6 +6,8 @@ import mistune
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+MAX_STRING_LENGTH = 200
+
 def remove_non_ascii_1(text):
     return ''.join(i for i in text if ord(i)<128)
 
@@ -34,11 +36,10 @@ def extract_markdown(text):
     text = clean(text)
     xml  = "<(.+?)/(.+?)>"
     text = re.sub(xml,'',text)
-    #text = mistune.markdown(text)
-    #paraph = r"\#(.*?)\#"
+
     pattern = re.compile(r'\#+(.+?)\#+', flags=re.DOTALL)
     result = re.findall(pattern, text)
-    if(len(result)!=0):
+    if(len(result)>10):
         return result[0].replace('\n',' ')
     else:
         text = mistune.markdown(text)
@@ -47,7 +48,10 @@ def extract_markdown(text):
         if(len(result)!=0):
             return result[0].replace('\n',' ')
         else:
-            return ''
+            info = (text[:MAX_STRING_LENGTH] + ' ...') if len(text) > MAX_STRING_LENGTH else text
+            return info
+    #info = (text[:MAX_STRING_LENGTH] + ' ...') if len(text) > MAX_STRING_LENGTH else text
+    #return info
 
 
 if __name__=="__main__":

@@ -25,7 +25,7 @@ def create_table(user, password, database_name, table_name):
     conn = MySQLdb.connect(host='localhost', user=user, passwd=password, db=database_name)
     curs = conn.cursor()
     sql = """CREATE TABLE %s (id varchar (255) PRIMARY KEY, project_name TEXT, description TEXT, 
-    readme TEXT, library_name TEXT, library_group TEXT,library_version TEXT, git_url TEXT, origin_id TEXT,tag TEXT)"""
+    readme TEXT, library_name TEXT, library_group TEXT,library_version TEXT, git_url TEXT,readme_url TEXT, tag TEXT)"""
     curs.execute(sql % table_name)
     conn.close()
 
@@ -50,9 +50,9 @@ class mysql():
 
 if __name__ == "__main__":
     #create_database(USER,PWD,DB_NAME)
-    #create_table(USER,PWD,DB_NAME,TABLE_NAME)
+    create_table(USER,PWD,DB_NAME,TABLE_NAME)
     my = mysql(USER,PWD,DB_NAME,TABLE_NAME)
-    data = ('2',"34em342","34343","3e434","343ed5","6","8","9","10",'rre f')
+    data = ('2',"34em342","34343","3e434","343ed5","6","8","9",'4','rre f')
     #data = ('1', 'elasticsearch', '', '', '', '', '', 'git://github.com/elastic/elasticsearch.git', '507775', 'elasticsearch#java#search-engine')
     my.insert(data)
     my.close_connection()
