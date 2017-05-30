@@ -13,12 +13,17 @@ def remove_non_ascii_1(text):
 
 def clean(text):
     try:
+        if(text == ''):
+            return ''
+        if(text == None):
+            return ''
         text = remove_non_ascii_1(text)
         text = re.sub(',',' ',text)
         text = re.sub(' +', ' ',text)
         text = re.sub('\n+','\n',text)
     except Exception,e:
-        print e
+       print e
+       print 'ERROR OF clean'
     return text
 
 
@@ -55,8 +60,10 @@ def extract_markdown(text):
 
 
 if __name__=="__main__":
-
+    a = '2011-01-26T19:01:12Z'
+    b = '2010-12-6T20:01:12Z'
+    print b>a
     # print remove_non_ascii_1('sdwodesds~~~')
     # print clean('fs\n\n   ff ')
     # print base64_to_utf8('/home/yangqiao/1')
-    print extract_markdown(open('text.md', 'r').read())
+    #print extract_markdown(open('text.md', 'r').read())
