@@ -20,5 +20,5 @@ following steps:
    into page so we can get all result
 6. happily run GithubCrawl.py
 
-#if you think this project may helpful, may you give my repo a STAR? :)
+### if you think this project may helpful, may you give my repo a STAR? :)
 
