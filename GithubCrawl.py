@@ -24,7 +24,8 @@ MAX_PAGE = 21
 ITEM_PER_PAGE = 50
 #get start from specific time
 START_FROM_TIME ='\"2017-05-29T20:59:59Z .. 2017-05-29T23:59:59Z\"'
-
+#for a specific time,result is muilt-page,get start from specific page
+SRART_FROM_PAGE = 8
 #max core we can use
 MAX_WORKER = cpu_count()-1
 #files you want for a project
@@ -48,12 +49,18 @@ def _get_real_file_url(urls):
     return urls
 
 #count down 4 hours for a new search
-def get_new_time(old_time):
-    old_times = str(old_time).replace('\"','').split(' .. ')
-    start_time = dateutil.parser.parse(old_times[0])
-    end_time = old_times[0]
-    start_time = (start_time - timedelta(hours=3)).isoformat().replace('+00:00','Z')
-    return '\"'+start_time+' .. '+end_time+'\"',start_time
+def get_new_time(time_period,need_sub):
+    time_period_list = str(time_period).replace('\"', '').split(' .. ')
+    if(need_sub):
+        start_time = dateutil.parser.parse(time_period_list[0])
+        end_time = time_period_list[0]
+        start_time = (start_time - timedelta(hours=3)).isoformat().replace('+00:00','Z')
+        return '\"' + start_time + ' .. ' + end_time + '\"', start_time
+    else:
+        start_time = dateutil.parser.parse(time_period_list[0]).isoformat().replace('+00:00','Z')
+        return time_period,start_time
+
+
 
 
 #extract information of single project
@@ -169,16 +176,15 @@ def crawl_url(need_insert_database):
         mysql_handler = mysql.mysql(mysql.USER,mysql.PWD,mysql.DB_NAME,mysql.TABLE_NAME)
 
     is_restart = True
-    start_time = START_FROM_TIME
-    while((start_time>'2012-01-01T23:59:59Z') or is_restart):
+    time_period,start_time = get_new_time(START_FROM_TIME,False)
+    while(start_time>'2012-01-01T23:59:59Z'):
         if(is_restart):
             is_restart = False
-            time_period = start_time
+            page = SRART_FROM_PAGE
         else:
-            time_period, start_time = get_new_time(start_time)
-
+            time_period, start_time = get_new_time(start_time,True)
+            page = 1
         max_page = MAX_PAGE
-        page = 1
         while(page<max_page):
             url = "https://api.github.com/search/repositories?q=created:" + time_period + "+language:Java&per_page=" + str(ITEM_PER_PAGE) + "&page=" + str(page) + "&access_token=" + TOKEN
             request_result = requests.get(url)
@@ -213,5 +219,5 @@ if __name__=="__main__":
     crawl_url(True)
     #mytest()
     #print START_FROM_TIME
-    #print get_new_time(START_FROM_TIME)
+    #print get_new_time(START_FROM_TIME,False)
     executor.shutdown()
