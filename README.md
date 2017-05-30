@@ -13,8 +13,7 @@ following steps:
 2. mkdir a new file in the project path named token_key, then copy&paste your personal access token into it(no need to add \n)
 3. modify MysqlOption.py and set your mysql USER and PASSWORD
 4. run MysqlOption.py to create database and new table
-5. modify GithubCrawl.py ,set START_FROM_PAGE = YOUR START, since the project count is 320W and
-  every query we get only 50 project(MAX is 100), sometimes exception throws and program may down, we need to use page
-  set to avoid starting from zero
+5. modify GithubCrawl.py ,set START_FROM_TIME = YOUR START, since the project count is 320W and
+   every query max return result is 1000, we need to split these result according to create time
 6. happily run GithubCrawl.py
 
