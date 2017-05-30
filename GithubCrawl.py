@@ -101,32 +101,34 @@ def get_information(item):
 
 def _extract_info_from_file(url):
     dependency = []
-
-    page = urllib.urlopen(url)
-    text = page.read()
-    # README.md
-    if url.find('README') != -1:
-        readme = cu.extract_markdown(text)
-        dependency.append(readme)
-    # build.gradle
-    elif url.find(TYPE[0]) != -1:
-        index = text.find("dependencies {")
-        text = text[index:]
-        index = text.find("}")
-        text = text[:index]
-        p = re.compile(r'\'(.*:.*:.*)\'\n')
-        for dep in p.findall(text):
-            dependency.append(dep)
-    # pom.xml
-    elif url.find(TYPE[1]) != -1:
-        soup = BeautifulSoup(text, "lxml")
-        dep = soup.findAll(name="dependency")
-        for i in range(len(dep)):
-            temp = dep[i].contents
-            if (len(temp) == 7):
-                dependency.append(temp[1].text + ":" + temp[3].text + ":" + temp[5].text)
-            else:
-                dependency.append(temp[1].text + ":" + temp[3].text + ":" + '')
+    try:
+        page = urllib.urlopen(url)
+        text = page.read()
+        # README.md
+        if url.find('README') != -1:
+            readme = cu.extract_markdown(text)
+            dependency.append(readme)
+        # build.gradle
+        elif url.find(TYPE[0]) != -1:
+            index = text.find("dependencies {")
+            text = text[index:]
+            index = text.find("}")
+            text = text[:index]
+            p = re.compile(r'\'(.*:.*:.*)\'\n')
+            for dep in p.findall(text):
+                dependency.append(dep)
+        # pom.xml
+        elif url.find(TYPE[1]) != -1:
+            soup = BeautifulSoup(text, "lxml")
+            dep = soup.findAll(name="dependency")
+            for i in range(len(dep)):
+                temp = dep[i].contents
+                if (len(temp) == 7):
+                    dependency.append(temp[1].text + ":" + temp[3].text + ":" + temp[5].text)
+                else:
+                    dependency.append(temp[1].text + ":" + temp[3].text + ":" + '')
+    except Exception,e:
+        print e
     return dependency
 
 
@@ -139,12 +141,10 @@ def extract_info_from_file(urls,readme_url):
     dependency_group = []
     dependency_name = []
     dependency_version = []
-    try:
-        readme =  _extract_info_from_file(readme_url)[0]
-    except Exception,e:
-        readme = ''
-        print e
-        print ' ERROR OF _extract_info_from_file'
+    readme = ''
+    if('README' in readme_url):
+        readme = _extract_info_from_file(readme_url)[0]
+
     # for url in urls:
     #     dependence = _extract_info_from_file(url)
     #     dependency.extend(dependence)
@@ -168,9 +168,14 @@ def crawl_url(need_insert_database):
     if(need_insert_database):
         mysql_handler = mysql.mysql(mysql.USER,mysql.PWD,mysql.DB_NAME,mysql.TABLE_NAME)
 
-    start_time = '2017'
-    while(start_time>'2012-01-01T23:59:59Z'):
-        time_period, start_time = get_new_time(START_FROM_TIME)
+    is_restart = True
+    start_time = START_FROM_TIME
+    while((start_time>'2012-01-01T23:59:59Z') or is_restart):
+        if(is_restart):
+            is_restart = False
+            time_period = start_time
+        else:
+            time_period, start_time = get_new_time(start_time)
 
         max_page = MAX_PAGE
         page = 1
@@ -179,7 +184,7 @@ def crawl_url(need_insert_database):
             request_result = requests.get(url)
             print 'API limit time is '+str(request_result.headers.get('X-RateLimit-Remaining'))
             res = json.loads(request_result.content)
-            max_page = min(math.ceil(float(res.get('total_count'))/ITEM_PER_PAGE),MAX_PAGE)
+            max_page = min(int(math.ceil(float(res.get('total_count'))/ITEM_PER_PAGE)),MAX_PAGE)
             items = dict(res).get("items")
             #every page has several project
             for item in items:
@@ -194,7 +199,7 @@ def crawl_url(need_insert_database):
                             if(need_insert_database):
                                 id += 1
                                 data = (str(origin_id),str(project_name),str(description),readme,name,group,version,git_url,readme_url,topics)
-                                print str(id)+'-------'+str(page)+'--------'+project_name+'-----------'+time_period
+                                print str(id)+'-------'+str(page)+'-----'+str(max_page)+'-----'+project_name+'-----------'+time_period+'------'+topics
                                 try:
                                     mysql_handler.insert(data)
                                     mysql_handler.connection.commit()

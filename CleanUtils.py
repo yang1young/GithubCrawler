@@ -18,7 +18,7 @@ def clean(text):
         if(text == None):
             return ''
         text = remove_non_ascii_1(text)
-        text = re.sub(',',' ',text)
+        #text = re.sub(',',' ',text)
         text = re.sub(' +', ' ',text)
         text = re.sub('\n+','\n',text)
     except Exception,e:
@@ -56,7 +56,7 @@ def extract_markdown(text):
             return result[0].replace('\n',' ')
         else:
             info = (text[:MAX_STRING_LENGTH] + ' ...') if len(text) > MAX_STRING_LENGTH else text
-            return info
+            return clean(info)
 
 
 if __name__=="__main__":
