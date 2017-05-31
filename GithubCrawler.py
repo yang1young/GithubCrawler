@@ -20,19 +20,19 @@ sys.setdefaultencoding('utf-8')
 # update your token here, https://github.com/settings/tokens
 TOKEN = open('token_key', 'r').read()
 # query limit is 30 times per hour
-MAX_PAGE = 21
+MAX_PAGE = 11
 # max is 100 record per page
-ITEM_PER_PAGE = 50
+ITEM_PER_PAGE = 100
 # get start from specific time
-START_FROM_TIME = '\"2017-05-29T20:59:59Z .. 2017-05-29T23:59:59Z\"'
+START_FROM_TIME = '\"2017-05-30T16:59:59Z .. 2017-05-30T19:59:59Z\"'
 # for a specific time,result is muilt-page,get start from specific page
-SRART_FROM_PAGE = 8
+SRART_FROM_PAGE = 2
 # max core we can use
-MAX_WORKER = cpu_count() - 1
+MAX_WORKER = (cpu_count() - 1)*2
 # files you want for a project
 TYPE = ['build.gradle', 'pom.xml']
 # project update date
-UPADATE_DATE = '2015-01-01T19:01:12Z'
+UPADATE_DATE = '2011-01-01T19:01:12Z'
 # thread pool handler
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKER)
 
@@ -70,20 +70,23 @@ def get_information(item):
 
     # do another query for a specific project and modify GET header,query limits is 5000 per hour
     head = {"Accept": "application/vnd.github.mercy-preview+json", "Authorization": "token " + TOKEN}
-    res = dict(json.loads(requests.get(project_url, headers=head).content))
-    origin_id = res.get('id')
-    if (len(res.get('topics')) > 0):
-        topics = '#'.join(list(res.get('topics')))
-    else:
-        topics = ''
-    description = res.get('description')
-    full_name = res.get('full_name')
+    try:
+        res = dict(json.loads(requests.get(project_url, headers=head).content))
+        origin_id = res.get('id')
+        if (len(res.get('topics')) > 0):
+            topics = '#'.join(list(res.get('topics')))
+        else:
+            topics = ''
+        description = res.get('description')
+        full_name = res.get('full_name')
 
-    dependency_urls = []
-    min_readme_lenghth = 100000
-    min_readme_path = ''
-    get_file_url = project_url + '/git/trees/master?recursive=1'
-    file_result = json.loads(requests.get(get_file_url, headers=head).content)
+        dependency_urls = []
+        min_readme_lenghth = 100000
+        min_readme_path = ''
+        get_file_url = project_url + '/git/trees/master?recursive=1'
+        file_result = json.loads(requests.get(get_file_url, headers=head).content)
+    except Exception, e:
+        print e
 
     if (dict(file_result).has_key('tree')):
         for r in dict(file_result).get('tree'):
@@ -174,7 +177,7 @@ def crawl_url(need_insert_database):
 
     is_restart = True
     time_period, start_time = get_new_time(START_FROM_TIME, False)
-    while (start_time > '2012-01-01T23:59:59Z'):
+    while (start_time > '2011-01-01T23:59:59Z'):
         if (is_restart):
             is_restart = False
             page = SRART_FROM_PAGE
@@ -191,29 +194,33 @@ def crawl_url(need_insert_database):
             max_page = min(int(math.ceil(float(res.get('total_count')) / ITEM_PER_PAGE)), MAX_PAGE)
             items = dict(res).get("items")
             # every page has several project
+            if(len(items)==0):
+                continue
             for item in items:
                 if (item.get('updated_at') > UPADATE_DATE):
-                    project_name, git_url, topics, description, origin_id, file_urls, readme_url = get_information(item)
-                    if (not len(file_urls) == 0):
-                        # extract info from files
-                        readme, dependency, group, name, version = extract_info_from_file(file_urls, readme_url)
-                        if (not (description == '' and readme == '')):
-                            description = cu.clean(description)
-                            readme = cu.clean(readme)
-                            if (need_insert_database):
-                                id += 1
-                                data = (
-                                str(origin_id), str(project_name), str(description), readme, name, group, version,
-                                git_url, readme_url, topics)
-                                print str(id) + '-------' + str(page) + '-----' + str(
-                                    max_page) + '-----' + project_name + '-----------' + time_period + '------' + topics
-                                try:
+                    try:
+                        file_urls = ''
+                        project_name, git_url, topics, description, origin_id, file_urls, readme_url = get_information(item)
+                        if (not len(file_urls) == 0):
+                            # extract info from files
+                            readme, dependency, group, name, version = extract_info_from_file(file_urls, readme_url)
+                            if (not (description == '' and readme == '')):
+                                description = cu.clean(description)
+                                readme = cu.clean(readme)
+                                if (need_insert_database):
+                                    id += 1
+                                    data = (str(origin_id), str(project_name), str(description), readme, name, group, version,
+                                    git_url, readme_url, str(item.get('create_at')),str(item.get('updated_at')),topics)
+                                    print str(id) + '-------' + str(page) + '-----' + str(
+                                        max_page) + '-----' + project_name + '-----------' + time_period + '------' + topics
+
                                     mysql_handler.insert(data)
                                     mysql_handler.connection.commit()
-                                except Exception, e:
-                                    print e
-                            else:
-                                print project_name
+
+                                else:
+                                    print project_name
+                    except Exception, e:
+                            print e
             page += 1
 
 

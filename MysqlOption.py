@@ -23,8 +23,9 @@ def create_database(user, password, database_name):
 def create_table(user, password, database_name, table_name):
     conn = MySQLdb.connect(host='localhost', user=user, passwd=password, db=database_name)
     curs = conn.cursor()
-    sql = """CREATE TABLE %s (id varchar (255) PRIMARY KEY, project_name TEXT, description TEXT, 
-    readme TEXT, library_name TEXT, library_group TEXT,library_version TEXT, git_url TEXT,readme_url TEXT, tag TEXT)"""
+    sql = """CREATE TABLE %s (id varchar (255) PRIMARY KEY, project_name varchar (255), description TEXT,
+    readme TEXT, library_name TEXT, library_group TEXT,library_version TEXT, git_url varchar (255),readme_url varchar (255),
+    create_date varchar (255),update_date varchar (255),tag TEXT)"""
     curs.execute(sql % table_name)
     conn.close()
 
@@ -42,7 +43,7 @@ class mysql():
 
     def insert(self, data):
         # (id, project_name, description, readme, library_name,library_group,library_version, git_url, origin_id,tag)
-        sql = "insert into " + self.table_name + " values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        sql = "insert into " + self.table_name + " values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         self.cursor.execute(sql, data)
 
 
