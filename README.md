@@ -3,9 +3,20 @@ crawl github data using API then store into database
 
 ## you need to install:
 * Python2.7 (better Anaconda)
-* mysql, according to this tutorial
+* mysql, you can install and configure according to this tutorial
 http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/001391435131816c6a377e100ec4d43b3fc9145f3bb8056000
 
+## file introduction
+1. CrawlerWithoutAPI.py
+   demo crwal github without API, give a URL of REPO then return result
+2. GithubCrawler.py
+   crawl github using API, search all java project and extract readme,description,topic and all dependency file from .gradle and .pom
+3. MysqlOption.py
+   Mysql option, create database, table and insert/search
+4. CleanUtils.py
+   Some tools to do cleaning and extraction
+5. token_key
+   your Github API token
 
 ## user guide
 following steps:
