@@ -95,6 +95,7 @@ def get_information(item):
                 temp_path = str(r.get('path'))
                 if(('README' in temp_path) and (min_readme_lenghth> len(temp_path))):
                     min_readme_path = temp_path
+                    min_readme_lenghth = len(temp_path)
                 else:
                     for type_choose in TYPE:
                         if (type_choose in temp_path):
