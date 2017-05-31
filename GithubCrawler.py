@@ -24,15 +24,15 @@ MAX_PAGE = 11
 # max is 100 record per page
 ITEM_PER_PAGE = 100
 # get start from specific time
-START_FROM_TIME = '\"2017-05-30T16:59:59Z .. 2017-05-30T19:59:59Z\"'
+START_FROM_TIME = '\"2017-05-30T16:59:59Z .. 2017-05-30T17:59:59Z\"'
 # for a specific time,result is muilt-page,get start from specific page
-SRART_FROM_PAGE = 2
+SRART_FROM_PAGE = 3
 # max core we can use
 MAX_WORKER = (cpu_count() - 1)*2
 # files you want for a project
 TYPE = ['build.gradle', 'pom.xml']
 # project update date
-UPADATE_DATE = '2011-01-01T19:01:12Z'
+UPADATE_DATE = '2012-01-01T19:01:12Z'
 # thread pool handler
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKER)
 
@@ -54,7 +54,7 @@ def get_new_time(time_period, need_sub):
     if (need_sub):
         start_time = dateutil.parser.parse(time_period_list[0])
         end_time = time_period_list[0]
-        start_time = (start_time - timedelta(hours=3)).isoformat().replace('+00:00', 'Z')
+        start_time = (start_time - timedelta(hours=1)).isoformat().replace('+00:00', 'Z')
         return '\"' + start_time + ' .. ' + end_time + '\"', start_time
     else:
         start_time = dateutil.parser.parse(time_period_list[0]).isoformat().replace('+00:00', 'Z')
