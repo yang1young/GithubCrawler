@@ -24,9 +24,9 @@ MAX_PAGE = 11
 # max is 100 record per page
 ITEM_PER_PAGE = 100
 # get start from specific time
-START_FROM_TIME = '\"2017-05-30T16:59:59Z .. 2017-05-30T17:59:59Z\"'
+START_FROM_TIME = '\"2017-05-30T22:59:59Z .. 2017-05-30T23:59:59Z\"'
 # for a specific time,result is muilt-page,get start from specific page
-SRART_FROM_PAGE = 3
+SRART_FROM_PAGE = 1
 # max core we can use
 MAX_WORKER = (cpu_count() - 1)*2
 # files you want for a project
@@ -210,7 +210,7 @@ def crawl_url(need_insert_database):
                                 if (need_insert_database):
                                     id += 1
                                     data = (str(origin_id), str(project_name), str(description), readme, name, group, version,
-                                    git_url, readme_url, str(item.get('create_at')),str(item.get('updated_at')),topics)
+                                    git_url, readme_url, str(item.get('created_at')),str(item.get('updated_at')),topics)
                                     print str(id) + '-------' + str(page) + '-----' + str(
                                         max_page) + '-----' + project_name + '-----------' + time_period + '------' + topics
 
