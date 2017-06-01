@@ -185,7 +185,7 @@ def crawl_url(need_insert_database):
             time_period, start_time = get_new_time(start_time, True)
             page = 1
         max_page = MAX_PAGE
-        while (page < max_page):
+        while (page < max_page+1):
             url = "https://api.github.com/search/repositories?q=created:" + time_period + "+language:Java&per_page=" + str(
                 ITEM_PER_PAGE) + "&page=" + str(page) + "&access_token=" + TOKEN
             request_result = requests.get(url)
