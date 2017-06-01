@@ -24,7 +24,7 @@ following steps:
 2. mkdir a new file in the project path named token_key, then copy&paste your personal access token into it(no need to add \n)
 3. modify MysqlOption.py and set your mysql USER and PASSWORD
 4. run MysqlOption.py to create database and new table
-5. modify GithubCrawl.py ,set START_FROM_TIME = YOUR START,set SRART_FROM_PAGE = YOUR START
+5. modify GithubCrawl.py ,set START_FROM_TIME = YOUR START,set END_TO_TIME = YOUR END, set SRART_FROM_PAGE = YOUR START
    since the return project count is 320W and every query total max return result is 1000, and for once time,
    max return result is 100,so firstly we need to split these result according to repo create time, ensure every query
    total return result is less than 1000, for every specific time period, we need to split the result(max is 1000)

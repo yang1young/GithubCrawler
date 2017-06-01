@@ -24,7 +24,9 @@ MAX_PAGE = 11
 # max is 100 record per page
 ITEM_PER_PAGE = 100
 # get start from specific time
-START_FROM_TIME = '\"2017-05-30T22:59:59Z .. 2017-05-30T23:59:59Z\"'
+START_FROM_TIME = '\"2016-12-31T22:59:59Z .. 2016-12-31T23:59:59Z\"'
+# end time
+END_TO_TIME = '2016-06-30T23:59:59Z'
 # for a specific time,result is muilt-page,get start from specific page
 SRART_FROM_PAGE = 1
 # max core we can use
@@ -177,7 +179,7 @@ def crawl_url(need_insert_database):
 
     is_restart = True
     time_period, start_time = get_new_time(START_FROM_TIME, False)
-    while (start_time > '2011-01-01T23:59:59Z'):
+    while (start_time > END_TO_TIME):
         if (is_restart):
             is_restart = False
             page = SRART_FROM_PAGE
