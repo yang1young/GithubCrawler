@@ -7,9 +7,9 @@ import math
 import urllib
 import json, requests
 import dateutil.parser
-import CleanUtils as cu
+import clean_utils as cu
 import concurrent.futures
-import MysqlOption as mysql
+import mysql_option as mysql
 from bs4 import BeautifulSoup
 from multiprocessing import cpu_count
 from datetime import datetime, timedelta
@@ -175,7 +175,7 @@ def extract_info_from_file(urls, readme_url):
 def crawl_url(need_insert_database):
     id = 0
     if (need_insert_database):
-        mysql_handler = mysql.mysql(mysql.USER, mysql.PWD, mysql.DB_NAME, mysql.TABLE_NAME)
+        mysql_handler = mysql.Mysql(mysql.USER, mysql.PWD, mysql.DB_NAME, mysql.TABLE_NAME)
 
     is_restart = True
     time_period, start_time = get_new_time(START_FROM_TIME, False)

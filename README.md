@@ -1,12 +1,12 @@
 # Github_Crawler
-crawl github data using API then store into database
+Crawl github data using github API or no-API, then store it into Mysql database
 
 ## you need to install:
 * Python2.7 (better Anaconda)
 * mysql, you can install and configure according to this tutorial
 http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/001391435131816c6a377e100ec4d43b3fc9145f3bb8056000
 
-## file introduction
+## File introduction
 1. CrawlerWithoutAPI.py
    demo crwal github without API, give a URL of REPO then return result
 2. GithubCrawler.py
@@ -18,7 +18,7 @@ http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a0
 5. token_key
    your Github API token
 
-## user guide
+## User guide
 following steps:
 1. generate your github access token, following this https://github.com/settings/tokens
 2. mkdir a new file in the project path named token_key, then copy&paste your personal access token into it(no need to add \n)

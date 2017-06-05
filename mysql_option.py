@@ -31,7 +31,7 @@ def create_table(user, password, database_name, table_name):
 
 
 # cursor.execute('insert into user (id, name) values (%s, %s)', ['1', 'Michael'])
-class mysql():
+class Mysql():
     def __init__(self, user, password, database_name, table_name):
         self.connection = MySQLdb.connect(host='localhost', user=user, passwd=password, db=database_name)
         self.cursor = self.connection.cursor()

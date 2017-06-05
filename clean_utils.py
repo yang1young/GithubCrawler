@@ -35,7 +35,7 @@ def base64_to_utf8(file):
         encoded = text.decode('base64')
         return encoded.encode('utf-8')
 
-
+#get description from readme file
 def extract_markdown(text):
     url = '(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.' \
           '[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\
