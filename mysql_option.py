@@ -38,6 +38,7 @@ class Mysql():
         self.table_name = table_name
 
     def close_connection(self):
+        self.cursor.close()
         self.connection.commit()
         self.connection.close()
 
@@ -46,6 +47,17 @@ class Mysql():
         sql = "insert into " + self.table_name + " values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         self.cursor.execute(sql, data)
 
+    def query_all(self):
+        sql = "select description,readme,library_group,library_name, tag from "+self.table_name +" where not description = '' OR not readme = '' "
+        self.cursor.execute(sql)
+        values = self.cursor.fetchall()
+        return values
+
+    def query_each(self):
+        sql = "select description,readme,library_group,library_name, tag from " + self.table_name + " where not description = '' OR not readme = '' "
+        self.cursor.execute(sql)
+        value_num = self.cursor.rowcount
+        return value_num
 
 if __name__ == "__main__":
     create_database(USER, PWD, DB_NAME)

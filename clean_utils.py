@@ -19,13 +19,50 @@ def clean(text):
         if (text == '' or text == None):
             return ''
         text = remove_non_ascii_1(text)
-        # text = re.sub(',',' ',text)
+        text = re.sub('&lt', '<', text)
+        text = re.sub('&gt', '>', text)
+        text = re.sub('<;', ' ', text)
+        text = re.sub("<(.+?)/(.+?)>", ' ', text)
+        text = re.sub("<(.+?)>", ' ', text)
+        text = re.sub('\[',' ',text)
+        text = re.sub(']',' ',text)
+        text = re.sub('"', ' ', text)
+        text = re.sub('!', ' ', text)
+        text = re.sub('#', ' ', text)
+        text = re.sub('{', ' ', text)
+        text = re.sub('}', ' ', text)
+        text = re.sub('\|', ' ', text)
+        text = re.sub('\*', ' : ', text)
+        text = re.sub('=', ' ', text)
+        text = re.sub('\$', ' ', text)
+        text = re.sub('"', ' ', text)
+        text = re.sub('/','',text)
+        text = re.sub('\(',' ',text)
+        text = re.sub('\)', ' ', text)
+        text = re.sub('<',' ',text)
+        text = re.sub('>',' ',text)
+        text = re.sub('\.',' ',text)
+        text = re.sub('-', ' ', text)
+        text = re.sub(':', ' : ', text)
         text = re.sub(' +', ' ', text)
         text = re.sub('\n+', '\n', text)
     except Exception, e:
         print e
         print 'ERROR OF clean'
-    return text
+    return text.strip()
+
+def camel_case_split(text):
+    matches = re.finditer('.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)', text)
+    texts = [m.group(0) for m in matches]
+    texts = [t.lower() for t in texts]
+    return ' '.join(texts)
+
+
+def data_prepare_clean(text):
+    text = clean(text)
+    texts = text.split(' ')
+    texts = [camel_case_split(t) for t in texts]
+    return ' '.join(texts)
 
 
 def base64_to_utf8(file):
@@ -64,6 +101,7 @@ if __name__ == "__main__":
     a = '2011-01-26T19:01:12Z'
     b = '2010-12-6T20:01:12Z'
     print b > a
+    #print camel_case_split('CamelCaseXYZ CamelCaseXYZ fr ')
     # print remove_non_ascii_1('sdwodesds~~~')
     # print clean('fs\n\n   ff ')
     # print base64_to_utf8('/home/yangqiao/1')
