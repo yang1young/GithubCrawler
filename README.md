@@ -17,6 +17,8 @@ http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a0
    Some tools to do cleaning and extraction
 5. token_key
    your Github API token
+6. data_prepare.py
+   prepare data from database to do deeplearning or data analyze
 
 ## User guide
 following steps:

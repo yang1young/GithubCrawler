@@ -33,7 +33,7 @@ def get_data():
         print description
     mysql.close_connection()
 
-def data_to_file(save_path):
+def database_to_file(save_path):
     code_train = codecs.open(save_path + 'code.train', 'w+', 'utf8')
     tag_train = codecs.open(save_path + 'tag.train', 'w+', 'utf8')
 
