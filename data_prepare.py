@@ -2,7 +2,7 @@ import mysql_option as mo
 import clean_utils as cc
 import codecs
 MAX_DEPEND_NUM = 10
-DATA_PATH = '/home/yangqiao/pythonProject/GithubCrawler/data/'
+DATA_PATH = '/home/yang/PythonProject/Github_Crawler/data/'
 
 
 class FileHandler():
@@ -66,7 +66,7 @@ def get_data(text_file, label_file,label_is_tag):
 
         #decide write what kind of info into file
         text = ''
-        if(dependecy!='' and (',' not in dependecy)):
+        if(dependecy!='' and (',' not in dependecy)and ('$' not in dependecy)):
             if(description != '' and get_length(description)>2):
                 text = description
             elif(readme !=''and get_length(readme)>2):
@@ -87,6 +87,6 @@ def get_data(text_file, label_file,label_is_tag):
 if __name__ == "__main__":
     handler = FileHandler(DATA_PATH)
     code_train, tag_train = handler.get_train_file('train', 'label')
-    get_data(code_train, tag_train,True)
+    get_data(code_train, tag_train,False)
     code_train.close()
     tag_train.close()
