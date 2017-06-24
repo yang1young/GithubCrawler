@@ -4,9 +4,9 @@ import codecs
 from collections import Counter
 
 MAX_DEPEND_NUM = 50
-DATA_PATH = '/home/qiaoyang/pythonProject/Github_Crawler/data_tag/'
+DATA_PATH = '/home/qiaoyang/pythonProject/Github_Crawler/data_of_tag/'
 FILE_MODE = 'w'
-MIN_FREQ = 10
+MIN_FREQ = 0
 
 
 class FileHandler():
@@ -49,7 +49,7 @@ def get_frequet_library(libary_handler):
         if (item[1] >= MIN_FREQ and item[0] != ''):
             word_picked.add(item[0])
 
-    file = open(DATA_PATH + 'frequecy_library_list', 'w')
+    file = open(DATA_PATH + 'frequecy_library_list.csv', 'w')
     for item in word_picked:
         file.write(item + '\n')
     return word_picked
@@ -120,6 +120,7 @@ def train_test_split(library_set, code_all, tag_all, code_train, tag_train, code
         for l in library:
             if (l in library_set):
                 new_tag.append(l)
+        print str(len(new_tag))+'----------'+str(len(str(code).split(' ')))
         new_tag = ' '.join(new_tag)
         if (new_tag != ''):
             if (index < test_number):
@@ -131,13 +132,13 @@ def train_test_split(library_set, code_all, tag_all, code_train, tag_train, code
             else:
                 code_train.write(code + '\n')
                 tag_train.write(new_tag + '\n')
-        print index
+        #print index
 
 
 if __name__ == "__main__":
     handler = FileHandler(DATA_PATH)
-    # code_all, tag_all = handler.get_all_file('text_all','label_all','w')
-    # get_data(code_all, tag_all,False)
+    # code_all, tag_all = handler.get_all_file('text_all','label_all','a')
+    # get_data(code_all, tag_all,True)
     # code_all.close()
     # tag_all.close()
 
@@ -145,17 +146,17 @@ if __name__ == "__main__":
     library_set = get_frequet_library(tag_all)
     code_all.close()
     tag_all.close()
-
-    code_all, tag_all = handler.get_all_file('text_all', 'label_all', 'r')
-    code_train,tag_train = handler.get_train_file('giga-fren.release2.fixed.en','giga-fren.release2.fixed.fr')
-    code_dev,tag_dev = handler.get_dev_file('newstest2013.en','newstest2013.fr')
-    code_test,tag_test = handler.get_test_file('text.test','label.test')
-    train_test_split(library_set,code_all, tag_all,code_train,tag_train,code_dev,tag_dev,code_test,tag_test,0.1,0.2)
-    code_all.close()
-    tag_all.close()
-    code_train.close()
-    tag_train.close()
-    code_dev.close()
-    tag_dev.close()
-    code_test.close()
-    tag_test.close()
+    #
+    # code_all, tag_all = handler.get_all_file('text_all', 'label_all', 'r')
+    # code_train,tag_train = handler.get_train_file('giga-fren.release2.fixed.en','giga-fren.release2.fixed.fr')
+    # code_dev,tag_dev = handler.get_dev_file('newstest2013.en','newstest2013.fr')
+    # code_test,tag_test = handler.get_test_file('text.test','label.test')
+    # train_test_split(library_set,code_all, tag_all,code_train,tag_train,code_dev,tag_dev,code_test,tag_test,0.1,0.2)
+    # code_all.close()
+    # tag_all.close()
+    # code_train.close()
+    # tag_train.close()
+    # code_dev.close()
+    # tag_dev.close()
+    # code_test.close()
+    # tag_test.close()

@@ -24,9 +24,9 @@ MAX_PAGE = 11
 # max is 100 record per page
 ITEM_PER_PAGE = 100
 # get start from specific time
-START_FROM_TIME = '\"2017-04-10T13:59:59Z .. 2017-04-10T14:59:59Z\"'
+START_FROM_TIME = '\"2016-10-19T06:59:59Z .. 2016-10-19T07:59:59Z\"'
 # end time
-END_TO_TIME = '2016-12-31T23:59:59Z'
+END_TO_TIME = '2016-06-30T23:59:59Z'
 # for a specific time,result is muilt-page,get start from specific page
 SRART_FROM_PAGE = 1
 # max core we can use
