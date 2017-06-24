@@ -3,4 +3,6 @@
 token_key
 text.md
 data/
-data_tag/
+data_of_tag
+data_remove_unfreq/
+
