@@ -24,11 +24,11 @@ MAX_PAGE = 11
 # max is 100 record per page
 ITEM_PER_PAGE = 100
 # get start from specific time
-START_FROM_TIME = '\"2016-10-19T06:59:59Z .. 2016-10-19T07:59:59Z\"'
+START_FROM_TIME = '\"2016-07-21T02:59:59Z .. 2016-07-21T03:59:59Z\"'
 # end time
 END_TO_TIME = '2016-06-30T23:59:59Z'
 # for a specific time,result is muilt-page,get start from specific page
-SRART_FROM_PAGE = 1
+SRART_FROM_PAGE = 2
 # max core we can use
 MAX_WORKER = (cpu_count())*2
 # files you want for a project

@@ -1,7 +1,5 @@
 import re
-
 import requests
-
 import mysql_option as mo
 import clean_utils as cc
 import codecs
@@ -11,7 +9,7 @@ MAX_DEPEND_NUM = 50
 DATA_PATH = '/home/qiaoyang/pythonProject/Github_Crawler/data_of_tag/'
 TAG_SET_FILE = '/home/qiaoyang/pythonProject/Github_Crawler/picked_tag.csv'
 FILE_MODE = 'w'
-MIN_FREQ = 2
+MIN_FREQ = 3
 
 
 class FileHandler():
@@ -191,18 +189,19 @@ def train_test_split(is_library, code_all, tag_all, code_train, tag_train, code_
 if __name__ == "__main__":
     handler = FileHandler(DATA_PATH)
 
+    #add new data to file
+    code_all, tag_all = handler.get_all_file('text_all','label_all','a')
+    get_data(code_all, tag_all,True,False)
+    code_all.close()
+    tag_all.close()
 
-    # code_all, tag_all = handler.get_all_file('text_all','label_all','a')
-    # get_data(code_all, tag_all,True,False)
-    # code_all.close()
-    # tag_all.close()
-    #
-    # code_all, tag_all = handler.get_all_file('text_all', 'label_all', 'r')
-    # library_set = get_frequet_library(tag_all)
-    # code_all.close()
-    # tag_all.close()
+    #get frequency list
+    code_all, tag_all = handler.get_all_file('text_all', 'label_all', 'r')
+    library_set = get_frequet_library(tag_all)
+    code_all.close()
+    tag_all.close()
 
-
+    #train test split
     # code_all, tag_all = handler.get_all_file('text_all', 'label_all', 'r')
     # code_train,tag_train = handler.get_train_file('giga-fren.release2.fixed.en','giga-fren.release2.fixed.fr')
     # code_dev,tag_dev = handler.get_dev_file('newstest2013.en','newstest2013.fr')
