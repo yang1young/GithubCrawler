@@ -72,8 +72,7 @@ def base64_to_utf8(file):
         encoded = text.decode('base64')
         return encoded.encode('utf-8')
 
-#get description from readme file
-def extract_markdown(text):
+def readme_clean(text):
     url = '(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.' \
           '[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]\
           .[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,})'
@@ -82,6 +81,11 @@ def extract_markdown(text):
     xml = "<(.+?)/(.+?)>"
     text = re.sub(xml, '', text)
     text = text.replace(',', ' ')
+    return text
+
+#get description from readme file
+def extract_markdown(text):
+    text = readme_clean(text)
     pattern = re.compile(r'\#+(.+?)\#+', flags=re.DOTALL)
     result = re.findall(pattern, text)
     if (len(result) > 10):

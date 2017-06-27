@@ -45,9 +45,13 @@ def get_length(text):
 # picked tag set
 def get_tag_set():
     tag_set = set()
-    tags = codecs.open(TAG_SET_FILE, 'r').read().split('\n')
+    tags = codecs.open(TAG_SET_FILE, 'r').readlines()
     for tag in tags:
-        tag_set.add(tag)
+        tag = str(tag).replace('\n','')
+        temp = tag.split(',')[2]
+        if(temp!=''):
+            tag_set.add(temp.replace('-',' '))
+    print ''
     return tag_set
 
 
@@ -82,15 +86,18 @@ def get_frequet_library(libary_handler):
 def get_tag_from_readme(tag_set, readme_url):
     request_result = requests.get(readme_url)
     readme = request_result.content.lower()
+    readme = cc.readme_clean(readme)
     tag_result = set()
     if ('400: invalid' in readme):
         return ''
-    readmes = re.findall(r"[\w']+|[.,!?;]", readme)
-    for r in readmes:
-        if (r in tag_set):
-            tag_result.add(r)
+    # readmes = re.findall(r"[\w']+|[.,!?;]", readme)
+    # for r in readmes:
+    #     if (r in tag_set):
+    #         tag_result.add(r.replace(' ','-'))
+    for tag in tag_set:
+        if(tag in readme):
+            tag_result.add(tag.replace(' ', '-'))
 
-    print ' '.join(tag_result)
     return ' '.join(tag_result)
 
 
@@ -146,6 +153,9 @@ def get_data(text_file, label_file, label_is_tag, need_tag_from_readme):
                     if (not tag == ''):
                         text_file.write(text + '\n')
                         label_file.write(tag + '\n')
+                        print text
+                        print tag
+                        print '*********************'
                 elif (not label_is_tag):
                     text_file.write(text + '\n')
                     label_file.write(dependecy + '\n')
@@ -186,7 +196,6 @@ def train_test_split(is_library, code_all, tag_all, code_train, tag_train, code_
                 else:
                     code_train.write(code + '\n')
                     tag_train.write(tag + '\n')
-                    # print index
     else:
         print("lines are not MATCH!!!")
 
@@ -195,16 +204,16 @@ if __name__ == "__main__":
     handler = FileHandler(DATA_PATH)
 
     # add new data to file
-    # code_all, tag_all = handler.get_all_file('text_all','label_all','a')
-    # get_data(code_all, tag_all,True,False)
-    # code_all.close()
-    # tag_all.close()
-
-    # get frequency list
-    code_all, tag_all = handler.get_all_file('text_all', 'label_all', 'r')
-    library_set, _ = get_frequet_library(tag_all)
+    code_all, tag_all = handler.get_all_file('text_all1','label_all1','a')
+    get_data(code_all, tag_all,True,True)
     code_all.close()
     tag_all.close()
+
+    # get frequency list
+    # code_all, tag_all = handler.get_all_file('text_all', 'label_all', 'r')
+    # library_set, _ = get_frequet_library(tag_all)
+    # code_all.close()
+    # tag_all.close()
 
     # train test split
     # code_all, tag_all = handler.get_all_file('text_all', 'label_all', 'r')
