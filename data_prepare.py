@@ -61,13 +61,22 @@ def get_frequet_library(libary_handler):
     counts = Counter(texts)
     common_list = counts.most_common()
     word_picked = set()
+    word_list = []
+    word_count = []
     for item in common_list:
         if (item[1] >= MIN_FREQ and item[0] != ''):
             word_picked.add(item[0])
+            word_list.append(item[0])
+            word_count.append(item[1])
 
     file = open(DATA_PATH + 'frequecy_library_list.csv', 'w')
+    file_map = open(DATA_PATH + 'frequecy_library_list_map.csv', 'w')
     for item in word_picked:
         file.write(item + '\n')
+    for tag,count in zip(word_list,word_count):
+        file_map.write(tag+","+str(count)+"\n")
+    file.close()
+    file_map.close()
     return word_picked
 
 
@@ -190,10 +199,10 @@ if __name__ == "__main__":
     handler = FileHandler(DATA_PATH)
 
     #add new data to file
-    code_all, tag_all = handler.get_all_file('text_all','label_all','a')
-    get_data(code_all, tag_all,True,False)
-    code_all.close()
-    tag_all.close()
+    # code_all, tag_all = handler.get_all_file('text_all','label_all','a')
+    # get_data(code_all, tag_all,True,False)
+    # code_all.close()
+    # tag_all.close()
 
     #get frequency list
     code_all, tag_all = handler.get_all_file('text_all', 'label_all', 'r')
