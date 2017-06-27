@@ -42,7 +42,7 @@ def get_length(text):
     return len(str(text).split(' '))
 
 
-#picked tag set
+# picked tag set
 def get_tag_set():
     tag_set = set()
     tags = codecs.open(TAG_SET_FILE, 'r').read().split('\n')
@@ -51,9 +51,9 @@ def get_tag_set():
     return tag_set
 
 
-#get library or tag list remove unfrequent item
+# get library or tag list remove unfrequent item
 def get_frequet_library(libary_handler):
-    if(type(libary_handler) is list):
+    if (type(libary_handler) is list):
         texts = '\n'.join(libary_handler).replace('\n', ' ').split(' ')
     else:
         library = libary_handler.read()
@@ -61,36 +61,33 @@ def get_frequet_library(libary_handler):
     counts = Counter(texts)
     common_list = counts.most_common()
     word_picked = set()
-    word_list = []
-    word_count = []
+    word_list_count = dict()
     for item in common_list:
         if (item[1] >= MIN_FREQ and item[0] != ''):
             word_picked.add(item[0])
-            word_list.append(item[0])
-            word_count.append(item[1])
+            word_list_count[item[0]] = item[1]
 
     file = open(DATA_PATH + 'frequecy_library_list.csv', 'w')
     file_map = open(DATA_PATH + 'frequecy_library_list_map.csv', 'w')
     for item in word_picked:
         file.write(item + '\n')
-    for tag,count in zip(word_list,word_count):
-        file_map.write(tag+","+str(count)+"\n")
+    for tag, count in word_list_count.iteritems():
+        file_map.write(tag + "," + str(count) + "\n")
     file.close()
     file_map.close()
-    return word_picked
+    return word_picked, word_list_count
 
 
-#get tag from readme.md according to keyword match
-def get_tag_from_readme(tag_set,readme_url):
-
+# get tag from readme.md according to keyword match
+def get_tag_from_readme(tag_set, readme_url):
     request_result = requests.get(readme_url)
     readme = request_result.content.lower()
     tag_result = set()
-    if('400: invalid' in readme ):
+    if ('400: invalid' in readme):
         return ''
     readmes = re.findall(r"[\w']+|[.,!?;]", readme)
     for r in readmes:
-        if(r in tag_set):
+        if (r in tag_set):
             tag_result.add(r)
 
     print ' '.join(tag_result)
@@ -116,7 +113,7 @@ def get_data(text_file, label_file, label_is_tag, need_tag_from_readme):
             groups = str(result[2]).split('#')
             names = str(result[3]).split('#')
             for group, name in zip(groups, names):
-                    dependecies.append(group + ':' + name)
+                dependecies.append(group + ':' + name)
         if (dependecies):
             dependecies = list(set(dependecies))
             dependecies.sort()
@@ -129,7 +126,7 @@ def get_data(text_file, label_file, label_is_tag, need_tag_from_readme):
         tags = str(result[4]).split('#')
         for t in tags:
             t = t.lower()
-            if(t in tag_set):
+            if (t in tag_set):
                 clean_tags.append(t)
         clean_tags.sort()
         tag = ' '.join(clean_tags).lower().replace('\n', ' ').replace('\t', ' ')
@@ -143,16 +140,16 @@ def get_data(text_file, label_file, label_is_tag, need_tag_from_readme):
                 text = readme
             if (text != ''):
                 if (label_is_tag):
-                    if(need_tag_from_readme and tag==''):
+                    if (need_tag_from_readme and tag == ''):
                         url = str(result[5])
-                        tag = get_tag_from_readme(tag_set,url)
-                    if(not tag == ''):
+                        tag = get_tag_from_readme(tag_set, url)
+                    if (not tag == ''):
                         text_file.write(text + '\n')
                         label_file.write(tag + '\n')
                 elif (not label_is_tag):
                     text_file.write(text + '\n')
                     label_file.write(dependecy + '\n')
-        print str(i)+'--------'+str(result_num)
+        print str(i) + '--------' + str(result_num)
     mysql.close_connection()
 
 
@@ -164,10 +161,10 @@ def train_test_split(is_library, code_all, tag_all, code_train, tag_train, code_
     tags = tag_all.read().split('\n')
     print len(codes)
     print len(tags)
-    if(len(codes)==len(tags)):
+    if (len(codes) == len(tags)):
         dev_number = int(dev_percent * len(codes))
         test_number = int(test_percent * len(codes))
-        library_set = get_frequet_library(tags)
+        library_set, _ = get_frequet_library(tags)
 
         for code, tag, index in zip(codes, tags, range(len(codes))):
             if (is_library):
@@ -194,23 +191,22 @@ def train_test_split(is_library, code_all, tag_all, code_train, tag_train, code_
         print("lines are not MATCH!!!")
 
 
-
 if __name__ == "__main__":
     handler = FileHandler(DATA_PATH)
 
-    #add new data to file
+    # add new data to file
     # code_all, tag_all = handler.get_all_file('text_all','label_all','a')
     # get_data(code_all, tag_all,True,False)
     # code_all.close()
     # tag_all.close()
 
-    #get frequency list
+    # get frequency list
     code_all, tag_all = handler.get_all_file('text_all', 'label_all', 'r')
-    library_set = get_frequet_library(tag_all)
+    library_set, _ = get_frequet_library(tag_all)
     code_all.close()
     tag_all.close()
 
-    #train test split
+    # train test split
     # code_all, tag_all = handler.get_all_file('text_all', 'label_all', 'r')
     # code_train,tag_train = handler.get_train_file('giga-fren.release2.fixed.en','giga-fren.release2.fixed.fr')
     # code_dev,tag_dev = handler.get_dev_file('newstest2013.en','newstest2013.fr')
