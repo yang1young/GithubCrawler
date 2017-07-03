@@ -16,10 +16,11 @@ class FileHandler():
     def __init__(self, save_path):
         self.save_path = save_path
 
-    def get_all_file(self, text_name, label_name, file_mode):
+    def get_all_file(self, text_name, label_name, dependency_name,file_mode):
         code_all = codecs.open(self.save_path + text_name, file_mode, 'utf8')
         tag_all = codecs.open(self.save_path + label_name, file_mode, 'utf8')
-        return code_all, tag_all
+        dependency_all = codecs.open(self.save_path + dependency_name, file_mode, 'utf8')
+        return code_all, tag_all,dependency_all
 
     def get_train_file(self, text_name, label_name):
         code_train = codecs.open(self.save_path + text_name, FILE_MODE, 'utf8')
@@ -97,14 +98,15 @@ def get_tag_from_readme(tag_set, readme_url):
     for tag in tag_set:
         if(tag in readme):
             tag_result.add(tag.replace(' ', '-'))
-
+    tag_result = list(tag_result)
+    tag_result.sort()
     return ' '.join(tag_result)
 
 
 # prepare training data
 # special char is : . -
-def get_data(text_file, label_file, label_is_tag, need_tag_from_readme):
-    mysql = mo.Mysql(mo.USER, mo.PWD, mo.DB_NAME, mo.TABLE_NAME)
+def get_data(database_name,text_file, label_file, dependency_file,label_is_tag, need_tag_from_readme):
+    mysql = mo.Mysql(mo.USER, mo.PWD, database_name, mo.TABLE_NAME)
     result_num = mysql.query_each()
     tag_set = get_tag_set()
     for i in range(result_num):
@@ -126,7 +128,7 @@ def get_data(text_file, label_file, label_is_tag, need_tag_from_readme):
             dependecies.sort()
         if (len(dependecies) > MAX_DEPEND_NUM):
             dependecies = dependecies[:MAX_DEPEND_NUM]
-        dependecy = ' '.join(dependecies).lower().replace('\n', ' ').replace('\t', ' ')
+        dependency = ' '.join(dependecies).lower().replace('\n', ' ').replace('\t', ' ')
 
         # get tag
         clean_tags = []
@@ -140,7 +142,7 @@ def get_data(text_file, label_file, label_is_tag, need_tag_from_readme):
 
         # decide write what kind of info into file
         text = ''
-        if (dependecy != '' and (',' not in dependecy) and ('$' not in dependecy)):
+        if (dependency != '' and (',' not in dependency) and ('$' not in dependency)):
             if (description != '' and get_length(description) > 2):
                 text = description
             elif (readme != '' and get_length(readme) > 2):
@@ -153,12 +155,13 @@ def get_data(text_file, label_file, label_is_tag, need_tag_from_readme):
                     if (not tag == ''):
                         text_file.write(text + '\n')
                         label_file.write(tag + '\n')
-                        print text
-                        print tag
-                        print '*********************'
+                        dependency_file.write(dependency+'\n')
+                        # print text
+                        # print tag
+                        # print '*********************'
                 elif (not label_is_tag):
                     text_file.write(text + '\n')
-                    label_file.write(dependecy + '\n')
+                    label_file.write(dependency + '\n')
         print str(i) + '--------' + str(result_num)
     mysql.close_connection()
 
@@ -204,19 +207,28 @@ if __name__ == "__main__":
     handler = FileHandler(DATA_PATH)
 
     # add new data to file
-    code_all, tag_all = handler.get_all_file('text_all1','label_all1','a')
-    get_data(code_all, tag_all,True,True)
+    code_all, tag_all,dependency_all = handler.get_all_file('text_all','label_all','dependency_all','a')
+    DB_NAME = "Github"
+    get_data(DB_NAME,code_all, tag_all,dependency_all,True,True)
     code_all.close()
     tag_all.close()
+    dependency_all.close()
 
-    # get frequency list
-    # code_all, tag_all = handler.get_all_file('text_all', 'label_all', 'r')
+    code_all, tag_all, dependency_all = handler.get_all_file('text_all', 'label_all', 'dependency_all', 'a')
+    DB_NAME = "Github_4"
+    get_data(DB_NAME, code_all, tag_all, dependency_all, True, True)
+    code_all.close()
+    tag_all.close()
+    dependency_all.close()
+
+    #get frequency list
+    #code_all, tag_all, dependency_all = handler.get_all_file('text_all', 'label_all', 'dependency_all', 'r')
     # library_set, _ = get_frequet_library(tag_all)
     # code_all.close()
     # tag_all.close()
 
     # train test split
-    # code_all, tag_all = handler.get_all_file('text_all', 'label_all', 'r')
+    #code_all, tag_all, dependency_all = handler.get_all_file('text_all', 'label_all', 'dependency_all', 'r')
     # code_train,tag_train = handler.get_train_file('giga-fren.release2.fixed.en','giga-fren.release2.fixed.fr')
     # code_dev,tag_dev = handler.get_dev_file('newstest2013.en','newstest2013.fr')
     # code_test,tag_test = handler.get_test_file('text.test','label.test')
