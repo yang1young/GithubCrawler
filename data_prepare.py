@@ -8,6 +8,7 @@ from collections import Counter
 MAX_DEPEND_NUM = 50
 DATA_PATH = '/home/qiaoyang/pythonProject/Github_Crawler/data_of_tag/'
 TAG_SET_FILE = '/home/qiaoyang/pythonProject/Github_Crawler/picked_tag.csv'
+DEPEMD_SET_FILE = '/home/qiaoyang/pythonProject/Github_Crawler/picked_library.csv'
 FILE_MODE = 'w'
 MIN_FREQ = 3
 
@@ -37,31 +38,44 @@ class FileHandler():
         tag_test = codecs.open(self.save_path + label_name, FILE_MODE, 'utf8')
         return code_test, tag_test
 
+    def get_dependency_file(self, label_name):
+        dependency_test = codecs.open(self.save_path + label_name, FILE_MODE, 'utf8')
+        return dependency_test
+
 
 # get length of texts according to blanks number
 def get_length(text):
     return len(str(text).split(' '))
 
-
 # picked tag set
-def get_tag_set():
+def get_tag_set(file):
     tag_set = set()
-    tags = codecs.open(TAG_SET_FILE, 'r').readlines()
+    tags = codecs.open(file, 'r').readlines()
     for tag in tags:
         tag = str(tag).replace('\n','')
         temp = tag.split(',')[2]
         if(temp!=''):
             tag_set.add(temp.replace('-',' '))
-    print ''
     return tag_set
+
+# picked library set
+def get_library_set(file):
+    library_set = set()
+    libraries = codecs.open(file, 'r').readlines()
+    for library in libraries:
+        library = str(library).replace('\n','')
+        temp = library.split(',')[2]
+        if(temp!=''):
+            library_set.add(temp)
+    return library_set
 
 
 # get library or tag list remove unfrequent item
-def get_frequet_library(libary_handler):
-    if (type(libary_handler) is list):
-        texts = '\n'.join(libary_handler).replace('\n', ' ').split(' ')
+def get_frequet_label(label_handler,file_name):
+    if (type(label_handler) is list):
+        texts = '\n'.join(label_handler).replace('\n', ' ').split(' ')
     else:
-        library = libary_handler.read()
+        library = label_handler.read()
         texts = str(library).replace('\n', ' ').split(' ')
     counts = Counter(texts)
     common_list = counts.most_common()
@@ -72,8 +86,8 @@ def get_frequet_library(libary_handler):
             word_picked.add(item[0])
             word_list_count[item[0]] = item[1]
 
-    file = open(DATA_PATH + 'frequecy_library_list.csv', 'w')
-    file_map = open(DATA_PATH + 'frequecy_library_list_map.csv', 'w')
+    file = open(DATA_PATH + str(file_name)+'.csv', 'w')
+    file_map = open(DATA_PATH + str(file_name)+'_map.csv', 'w')
     for item in word_picked:
         file.write(item + '\n')
     for tag, count in word_list_count.iteritems():
@@ -91,10 +105,7 @@ def get_tag_from_readme(tag_set, readme_url):
     tag_result = set()
     if ('400: invalid' in readme):
         return ''
-    # readmes = re.findall(r"[\w']+|[.,!?;]", readme)
-    # for r in readmes:
-    #     if (r in tag_set):
-    #         tag_result.add(r.replace(' ','-'))
+
     for tag in tag_set:
         if(tag in readme):
             tag_result.add(tag.replace(' ', '-'))
@@ -105,17 +116,17 @@ def get_tag_from_readme(tag_set, readme_url):
 
 # prepare training data
 # special char is : . -
-def get_data(database_name,text_file, label_file, dependency_file,label_is_tag, need_tag_from_readme):
+def get_all_data(database_name,text_file, label_file, dependency_file, need_tag_from_readme):
     mysql = mo.Mysql(mo.USER, mo.PWD, database_name, mo.TABLE_NAME)
     result_num = mysql.query_each()
-    tag_set = get_tag_set()
+    tag_set = get_tag_set(TAG_SET_FILE)
     for i in range(result_num):
+
         result = mysql.cursor.fetchone()
         # get description
         description = cc.data_prepare_clean(str(result[0]))
         # get readme
         readme = cc.data_prepare_clean(str(result[1]))
-
         # get dependency
         dependecies = []
         if ((result[2] != '') and (result[3] != '')):
@@ -148,27 +159,20 @@ def get_data(database_name,text_file, label_file, dependency_file,label_is_tag, 
             elif (readme != '' and get_length(readme) > 2):
                 text = readme
             if (text != ''):
-                if (label_is_tag):
-                    if (need_tag_from_readme and tag == ''):
-                        url = str(result[5])
-                        tag = get_tag_from_readme(tag_set, url)
-                    if (not tag == ''):
-                        text_file.write(text + '\n')
-                        label_file.write(tag + '\n')
-                        dependency_file.write(dependency+'\n')
-                        # print text
-                        # print tag
-                        # print '*********************'
-                elif (not label_is_tag):
+                if (need_tag_from_readme and tag == ''):
+                    url = str(result[5])
+                    tag = get_tag_from_readme(tag_set, url)
+                if (not tag == ''):
                     text_file.write(text + '\n')
-                    label_file.write(dependency + '\n')
+                    label_file.write(tag + '\n')
+                    dependency_file.write(dependency+'\n')
+
         print str(i) + '--------' + str(result_num)
     mysql.close_connection()
 
 
-# split data into train, dev, test data
-def train_test_split(is_library, code_all, tag_all, code_train, tag_train, code_dev, tag_dev, code_test, tag_test,
-                     dev_percent, test_percent):
+# split tag data into train, dev, test data
+def train_test_split(code_all, tag_all, code_train, tag_train, code_dev, tag_dev, code_test, tag_test,dev_percent, test_percent):
     # here you should know in linux wc-l's result is different to len(f.readlines())
     codes = code_all.read().split('\n')
     tags = tag_all.read().split('\n')
@@ -177,18 +181,8 @@ def train_test_split(is_library, code_all, tag_all, code_train, tag_train, code_
     if (len(codes) == len(tags)):
         dev_number = int(dev_percent * len(codes))
         test_number = int(test_percent * len(codes))
-        library_set, _ = get_frequet_library(tags)
 
         for code, tag, index in zip(codes, tags, range(len(codes))):
-            if (is_library):
-                new_tag = []
-                library = tag.split(' ')
-                for l in library:
-                    if (l in library_set):
-                        new_tag.append(l)
-                        print str(len(new_tag)) + '----------' + str(len(str(code).split(' ')))
-                tag = ' '.join(new_tag)
-
             if (tag != ''):
                 if (index < test_number):
                     code_test.write(code + '\n')
@@ -202,6 +196,26 @@ def train_test_split(is_library, code_all, tag_all, code_train, tag_train, code_
     else:
         print("lines are not MATCH!!!")
 
+#prepare data to do associate rules
+def get_description_library_file(tag_all,dependency_all,desc_lib_file):
+    library_set  = get_library_set(DEPEMD_SET_FILE)
+    tags = tag_all.read().split('\n')
+    dependencies = dependency_all.read().split('\n')
+    if (len(tags) == len(dependencies)):
+        for tag, dependency in zip(tags, dependencies):
+            new_dependency = []
+            library = dependency.split(' ')
+            for l in library:
+                if (l in library_set):
+                    new_dependency.append(l)
+            dependency = ' '.join(new_dependency)
+            if(dependency!=''):
+                result = str(tag) +' ' +dependency
+                desc_lib_file.write(result+ '\n')
+    else:
+        print("lines are not MATCH!!!")
+
+
 
 if __name__ == "__main__":
     handler = FileHandler(DATA_PATH)
@@ -209,35 +223,52 @@ if __name__ == "__main__":
     # add new data to file
     code_all, tag_all,dependency_all = handler.get_all_file('text_all','label_all','dependency_all','a')
     DB_NAME = "Github"
-    get_data(DB_NAME,code_all, tag_all,dependency_all,True,True)
+    get_all_data(DB_NAME,code_all, tag_all,dependency_all,True)
     code_all.close()
     tag_all.close()
     dependency_all.close()
 
     code_all, tag_all, dependency_all = handler.get_all_file('text_all', 'label_all', 'dependency_all', 'a')
     DB_NAME = "Github_4"
-    get_data(DB_NAME, code_all, tag_all, dependency_all, True, True)
+    get_all_data(DB_NAME, code_all, tag_all, dependency_all, True)
     code_all.close()
     tag_all.close()
     dependency_all.close()
 
-    #get frequency list
-    #code_all, tag_all, dependency_all = handler.get_all_file('text_all', 'label_all', 'dependency_all', 'r')
-    # library_set, _ = get_frequet_library(tag_all)
-    # code_all.close()
-    # tag_all.close()
+    #get frequency list of library
+    code_all, tag_all, dependency_all = handler.get_all_file('text_all', 'label_all', 'dependency_all', 'r')
+    library_set, _ = get_frequet_label(dependency_all,"dependency_freq")
+    code_all.close()
+    tag_all.close()
+
+    # get frequency list of tag
+    code_all, tag_all, dependency_all = handler.get_all_file('text_all', 'label_all', 'dependency_all', 'r')
+    tag_set, _ = get_frequet_label(tag_all, "tag_freq")
+    code_all.close()
+    tag_all.close()
+
 
     # train test split
-    #code_all, tag_all, dependency_all = handler.get_all_file('text_all', 'label_all', 'dependency_all', 'r')
-    # code_train,tag_train = handler.get_train_file('giga-fren.release2.fixed.en','giga-fren.release2.fixed.fr')
-    # code_dev,tag_dev = handler.get_dev_file('newstest2013.en','newstest2013.fr')
-    # code_test,tag_test = handler.get_test_file('text.test','label.test')
-    # train_test_split(False,code_all, tag_all,code_train,tag_train,code_dev,tag_dev,code_test,tag_test,0.1,0.2)
-    # code_all.close()
-    # tag_all.close()
-    # code_train.close()
-    # tag_train.close()
-    # code_dev.close()
-    # tag_dev.close()
-    # code_test.close()
-    # tag_test.close()
+    code_all, tag_all, dependency_all = handler.get_all_file('text_all', 'label_all', 'dependency_all', 'r')
+    code_train,tag_train = handler.get_train_file('giga-fren.release2.fixed.en','giga-fren.release2.fixed.fr')
+    code_dev,tag_dev = handler.get_dev_file('newstest2013.en','newstest2013.fr')
+    code_test,tag_test = handler.get_test_file('text.test','label.test')
+    train_test_split(code_all, tag_all,code_train,tag_train,code_dev,tag_dev,code_test,tag_test,0.1,0.2)
+    code_all.close()
+    tag_all.close()
+    dependency_all.close()
+    code_train.close()
+    tag_train.close()
+    code_dev.close()
+    tag_dev.close()
+    code_test.close()
+    tag_test.close()
+
+
+    #get tag,dependency file to do FP-grouth
+    code_all, tag_all, dependency_all = handler.get_all_file('text_all', 'label_all', 'dependency_all', 'r')
+    desc_tag_file = handler.get_dependency_file('FP_data')
+    code_all.close()
+    tag_all.close()
+    dependency_all.close()
+    desc_tag_file.close()
